@@ -3,44 +3,45 @@ import Link from "next/link";
 
 import { ArrowIcon } from "@/components/ui/ArrowIcon";
 import { Container } from "@/components/ui/Container";
-const collections = [
-  {
-    category: "Sneakers",
-    eyebrow: "Everyday / 01",
-    title: "Own the street.",
-    description: "Clean silhouettes made for daily plans and effortless style.",
-    image: "/images/products/sneaker.png",
-    background: "bg-[#e8e1d5]",
-    text: "text-neutral-950",
-    accent: "bg-neutral-950 text-white",
-    position: "right-[-8%] bottom-[-5%] h-[70%] w-[85%] -rotate-6",
-  },
-  {
-    category: "Running",
-    eyebrow: "Performance / 02",
-    title: "Find your pace.",
-    description: "Responsive comfort built for movement, distance, and momentum.",
-    image: "/images/hero/running.png",
-    background: "bg-[#303936]",
-    text: "text-white",
-    accent: "bg-white text-neutral-950",
-    position: "left-[-7%] bottom-[-4%] h-[72%] w-[88%] rotate-6",
-  },
-];
+import type { Product } from "@/types/product";
 
-export function CategoriesSection() {
+export function CategoriesSection({ products }: { products: Product[] }) {
+  const collections = [
+    {
+      category: "Sneakers",
+      eyebrow: "Everyday / 01",
+      title: "Own the street.",
+      description: "Clean silhouettes made for daily plans and effortless style.",
+      image: products.find((product) => product.category === "Sneakers")?.images[0]?.url,
+      background: "bg-[#181b21]",
+      text: "text-[#f4f1ea]",
+      accent: "bg-neutral-950 text-[#f4f1ea]",
+      imageClass: "scale-[1.14]",
+    },
+    {
+      category: "Running",
+      eyebrow: "Performance / 02",
+      title: "Find your pace.",
+      description: "Responsive comfort built for movement, distance, and momentum.",
+      image: products.find((product) => product.category === "Running")?.images[0]?.url,
+      background: "bg-[#20242b]",
+      text: "text-[#f4f1ea]",
+      accent: "bg-[#181b21] text-[#f4f1ea]",
+      imageClass: "scale-[1.08]",
+    },
+  ];
   return (
-    <section className="bg-[#171918] py-20 text-white sm:py-28">
+    <section className="bg-[#0f1115] py-20 text-[#f4f1ea] sm:py-28">
       <Container>
         <div className="flex flex-col justify-between gap-6 md:flex-row md:items-end">
           <div className="max-w-2xl">
-            <p className="eyebrow !text-[#c99b68]">Browse your way</p>
+            <p className="eyebrow !text-[#c6ff3a]">Browse your way</p>
             <h2 className="mt-3 text-3xl font-semibold tracking-[-0.035em] sm:text-5xl">
               Two ways to move.
             </h2>
           </div>
           <p className="max-w-md leading-7 text-neutral-400">
-            Shoesco is focused on two things done well: sneakers for the day
+            Shoesoco is focused on two things done well: sneakers for the day
             and running shoes for the distance.
           </p>
         </div>
@@ -52,19 +53,21 @@ export function CategoriesSection() {
               href={`/products?category=${collection.category}`}
               key={collection.category}
             >
-              <div className="absolute -right-24 -top-24 h-80 w-80 rounded-full border-[70px] border-white/10" />
+              <div className="absolute -right-24 -top-24 h-80 w-80 rounded-full border-[70px] border-[#2a2e36]/10" />
               <span className="absolute right-7 top-7 text-7xl font-semibold tracking-[-0.08em] opacity-[0.08] sm:text-9xl">
                 0{index + 1}
               </span>
 
-              <div className={`absolute ${collection.position} transition duration-700 ease-out group-hover:scale-105`}>
-                <Image
-                  alt={`${collection.category} collection`}
-                  className="object-contain drop-shadow-[0_25px_25px_rgba(0,0,0,0.18)]"
-                  fill
-                  sizes="(min-width: 1024px) 50vw, 100vw"
-                  src={collection.image}
-                />
+              <div className="absolute inset-x-5 bottom-14 top-[43%] transition duration-700 ease-out group-hover:scale-[1.02] sm:inset-x-8 sm:bottom-16 sm:top-[40%]">
+                {collection.image && (
+                  <Image
+                    alt={`${collection.category} collection`}
+                    className={`object-contain drop-shadow-[0_25px_25px_rgba(0,0,0,0.28)] ${collection.imageClass}`}
+                    fill
+                    sizes="(min-width: 1024px) 50vw, 100vw"
+                    src={collection.image}
+                  />
+                )}
               </div>
 
               <div className="relative z-10 max-w-sm">

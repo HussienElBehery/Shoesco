@@ -16,6 +16,12 @@ type ProductRow = {
   colors: string[];
   short_description: string;
   description: string;
+  fit_note: string | null;
+  fit: Product["fit"] | null;
+  width: Product["width"] | null;
+  materials: string | null;
+  care: string | null;
+  merchandising_label: string | null;
   featured: boolean;
   published: boolean;
   archived: boolean;
@@ -43,6 +49,12 @@ function mapProduct(row: ProductRow): Product {
     colors: row.colors,
     shortDescription: row.short_description,
     description: row.description,
+    fitNote: row.fit_note ?? "Fits true to size for most feet.",
+    fit: row.fit ?? "True to size",
+    width: row.width ?? "Standard",
+    materials: row.materials ?? "",
+    care: row.care ?? "",
+    merchandisingLabel: row.merchandising_label ?? "",
     featured: row.featured,
     published: row.published,
     archived: row.archived,
@@ -74,7 +86,7 @@ export const getProducts = cache(async (): Promise<Product[]> => {
     .eq("archived", false)
     .order("created_at", { ascending: false });
 
-  if (error) throw error;
+  if (error) return fallbackProducts;
   return (data as ProductRow[]).map(mapProduct);
 });
 
@@ -118,5 +130,8 @@ export const getStoreSettings = cache(async (): Promise<StoreSettings> => {
     heroEyebrow: data.hero_eyebrow,
     heroTitle: data.hero_title,
     heroDescription: data.hero_description,
+    deliveryNote: data.delivery_note ?? siteConfig.deliveryNote,
+    returnsNote: data.returns_note ?? siteConfig.returnsNote,
+    sizeGuideNote: data.size_guide_note ?? siteConfig.sizeGuideNote,
   };
 });

@@ -23,7 +23,7 @@ export function AdminProductList({ products }: { products: Product[] }) {
 
   return (
     <>
-      <div className="mt-8 flex flex-col gap-3 rounded-2xl bg-white p-4 sm:flex-row">
+      <div className="mt-8 flex flex-col gap-3 rounded-2xl bg-[#181b21] p-4 sm:flex-row">
         <input
           className="h-11 flex-1 rounded-xl border px-4 text-sm"
           onChange={(event) => setQuery(event.target.value)}
@@ -34,7 +34,7 @@ export function AdminProductList({ products }: { products: Product[] }) {
         <div className="flex gap-2">
           {(["All", "Sneakers", "Running"] as const).map((value) => (
             <button
-              className={`rounded-full px-4 py-2 text-xs font-semibold ${category === value ? "bg-neutral-950 text-white" : "bg-neutral-100"}`}
+              className={`rounded-full px-4 py-2 text-xs font-semibold ${category === value ? "bg-neutral-950 text-[#f4f1ea]" : "bg-neutral-100"}`}
               key={value}
               onClick={() => setCategory(value)}
               type="button"
@@ -44,7 +44,7 @@ export function AdminProductList({ products }: { products: Product[] }) {
           ))}
         </div>
       </div>
-      <div className="mt-4 overflow-hidden rounded-2xl bg-white">
+      <div className="mt-4 overflow-hidden rounded-2xl bg-[#181b21]">
         {filtered.map((product) => (
           <div className="grid gap-4 border-b p-5 last:border-0 sm:grid-cols-[1fr_auto_auto] sm:items-center" key={product.id}>
             <div>
@@ -61,7 +61,7 @@ export function AdminProductList({ products }: { products: Product[] }) {
         {filtered.length === 0 && <p className="p-8 text-center text-neutral-500">No matching products.</p>}
       </div>
       {products.some((product) => product.archived) && (
-        <details className="mt-6 rounded-2xl bg-white p-5">
+        <details className="mt-6 rounded-2xl bg-[#181b21] p-5">
           <summary className="cursor-pointer font-semibold">
             Archived products ({products.filter((product) => product.archived).length})
           </summary>

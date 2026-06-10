@@ -5,28 +5,21 @@ import { cn } from "@/lib/cn";
 
 type BrandMarkProps = {
   className?: string;
-  tone?: "dark" | "light";
 };
 
-export function BrandMark({
-  className,
-  tone = "dark",
-}: BrandMarkProps) {
+export function BrandMark({ className }: BrandMarkProps) {
   return (
     <Link
-      aria-label="Shoesco home"
-      className={cn("relative block h-10 w-36 overflow-hidden", className)}
+      aria-label="Shoesoco home"
+      className={cn("relative block h-12 w-28 sm:w-32", className)}
       href="/"
     >
       <Image
-        alt="Shoesco"
-        className={cn(
-          "object-contain object-left",
-          tone === "dark" && "invert",
-        )}
+        alt="Shoesoco"
+        className="object-contain object-left"
         fill
         priority
-        sizes="144px"
+        sizes="128px"
         src="/images/Logo-transparent.png"
       />
     </Link>

@@ -1,5 +1,7 @@
 export type ProductCategory = "Sneakers" | "Running";
 export type ProductGender = "Men" | "Women" | "Unisex";
+export type ProductFit = "Narrow" | "True to size" | "Roomy";
+export type ProductWidth = "Narrow" | "Standard" | "Wide";
 
 export type ProductImage = {
   id: string;
@@ -28,6 +30,12 @@ export type Product = {
   sizes: ProductSize[];
   shortDescription: string;
   description: string;
+  fitNote: string;
+  fit: ProductFit;
+  width: ProductWidth;
+  materials: string;
+  care: string;
+  merchandisingLabel: string;
   featured: boolean;
   published: boolean;
   archived: boolean;
@@ -46,6 +54,9 @@ export type StoreSettings = {
   heroEyebrow: string;
   heroTitle: string;
   heroDescription: string;
+  deliveryNote: string;
+  returnsNote: string;
+  sizeGuideNote: string;
 };
 
 export type CartItem = {
@@ -58,6 +69,8 @@ export type CartItem = {
   color: string;
   unitPrice: number;
   quantity: number;
+  availableSizes: string[];
+  availableColors: string[];
 };
 
 export type WhatsAppOrderDetails = {

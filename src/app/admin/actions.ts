@@ -11,6 +11,14 @@ function text(formData: FormData, key: string) {
 }
 
 function productValues(formData: FormData) {
+  const fit = text(formData, "fit");
+  const width = text(formData, "width");
+  if (!["Narrow", "True to size", "Roomy"].includes(fit)) {
+    throw new Error("Select a valid fit.");
+  }
+  if (!["Narrow", "Standard", "Wide"].includes(width)) {
+    throw new Error("Select a valid width.");
+  }
   return {
     slug: text(formData, "slug").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, ""),
     name: text(formData, "name"),
@@ -20,6 +28,12 @@ function productValues(formData: FormData) {
     colors: text(formData, "colors").split(",").map((value) => value.trim()).filter(Boolean),
     short_description: text(formData, "shortDescription"),
     description: text(formData, "description"),
+    fit_note: text(formData, "fitNote"),
+    fit,
+    width,
+    materials: text(formData, "materials"),
+    care: text(formData, "care"),
+    merchandising_label: text(formData, "merchandisingLabel"),
     featured: formData.get("featured") === "on",
     published: formData.get("published") === "on",
     archived: false,
@@ -32,19 +46,27 @@ async function replaceSizes(
   formData: FormData,
   supabase: Awaited<ReturnType<typeof createClient>>,
 ) {
-  const sizes = text(formData, "sizes")
-    .split(",")
-    .map((size) => size.trim())
-    .filter(Boolean);
-  const unavailable = new Set(formData.getAll("unavailableSizes").map(String));
+  let rows: { size: string; available: boolean }[] = [];
+  try {
+    rows = JSON.parse(text(formData, "sizeRows")) as typeof rows;
+  } catch {
+    throw new Error("Sizes could not be read.");
+  }
+  const sizes = rows
+    .map((row) => ({ size: String(row.size).trim(), available: Boolean(row.available) }))
+    .filter((row) => row.size);
+  if (!sizes.length) throw new Error("Add at least one size.");
+  if (new Set(sizes.map((row) => row.size)).size !== sizes.length) {
+    throw new Error("Duplicate sizes are not allowed.");
+  }
 
   await supabase.from("product_sizes").delete().eq("product_id", productId);
   if (sizes.length) {
     const { error } = await supabase.from("product_sizes").insert(
-      sizes.map((size) => ({
+      sizes.map((row) => ({
         product_id: productId,
-        size,
-        available: !unavailable.has(size),
+        size: row.size,
+        available: row.available,
       })),
     );
     if (error) throw error;
@@ -101,8 +123,14 @@ export async function saveProduct(formData: FormData) {
   const id = text(formData, "id");
   const values = productValues(formData);
 
-  if (!values.name || !values.slug || !values.description) {
-    throw new Error("Name, slug, and description are required.");
+  if (!values.name || !values.slug || !values.description || !values.short_description) {
+    throw new Error("Name, slug, short description, and description are required.");
+  }
+  if (values.price_egp < 1) {
+    throw new Error("Price must be greater than zero.");
+  }
+  if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(values.slug)) {
+    throw new Error("Slug must use lowercase letters, numbers, and hyphens.");
   }
 
   const query = id
@@ -120,6 +148,12 @@ export async function saveProduct(formData: FormData) {
         .from("product_images")
         .update({ position: Math.max(0, Number(value) || 0) })
         .eq("id", key.replace("imagePosition:", ""));
+    }
+    if (key.startsWith("imageAlt:")) {
+      await supabase
+        .from("product_images")
+        .update({ alt_text: String(value).trim() || values.name })
+        .eq("id", key.replace("imageAlt:", ""));
     }
   }
 
@@ -182,6 +216,9 @@ export async function saveSettings(formData: FormData) {
       hero_eyebrow: text(formData, "heroEyebrow"),
       hero_title: text(formData, "heroTitle"),
       hero_description: text(formData, "heroDescription"),
+      delivery_note: text(formData, "deliveryNote"),
+      returns_note: text(formData, "returnsNote"),
+      size_guide_note: text(formData, "sizeGuideNote"),
       updated_at: new Date().toISOString(),
     })
     .eq("id", 1);

@@ -20,17 +20,17 @@ export function SocialLinks({
 }: SocialLinksProps) {
   const links = [
     {
-      label: "Contact Shoesco on WhatsApp",
-      href: `https://wa.me/${whatsappNumber}?text=${encodeURIComponent("Hello Shoesco, I would like to ask about your shoes.")}`,
+      label: "Contact Shoesoco on WhatsApp",
+      href: `https://wa.me/${whatsappNumber}?text=${encodeURIComponent("Hello Shoesoco, I would like to ask about your shoes.")}`,
       icon: WhatsAppIcon,
     },
     {
-      label: "Follow Shoesco on Instagram",
+      label: "Follow Shoesoco on Instagram",
       href: instagramUrl,
       icon: InstagramIcon,
     },
     {
-      label: "Follow Shoesco on TikTok",
+      label: "Follow Shoesoco on TikTok",
       href: tiktokUrl,
       icon: TikTokIcon,
     },
@@ -38,8 +38,8 @@ export function SocialLinks({
 
   const colors =
     theme === "dark"
-      ? "border-white/15 text-neutral-300 hover:border-white/40 hover:bg-white hover:text-neutral-950"
-      : "border-neutral-300 text-neutral-700 hover:border-neutral-950 hover:bg-neutral-950 hover:text-white";
+      ? "border-[#2a2e36] text-neutral-300 hover:border-[#c6ff3a] hover:bg-[#181b21] hover:text-[#c6ff3a]"
+      : "border-neutral-300 text-neutral-700 hover:border-neutral-950 hover:bg-neutral-950 hover:text-[#f4f1ea]";
 
   return (
     <div className={`flex items-center gap-2 ${className}`}>

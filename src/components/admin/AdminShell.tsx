@@ -6,8 +6,8 @@ import { signOut } from "@/app/admin/actions";
 
 export function AdminShell({ children }: { children: ReactNode }) {
   return (
-    <div className="min-h-screen bg-[#f2f0ea]">
-      <header className="border-b border-black/10 bg-white">
+    <div className="min-h-screen bg-[#0f1115]">
+      <header className="border-b border-[#2a2e36] bg-[#181b21]">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-5 py-4">
           <div className="flex items-center gap-8">
             <BrandMark />

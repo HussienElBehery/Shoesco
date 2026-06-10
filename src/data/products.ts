@@ -42,6 +42,18 @@ export const products: Product[] = catalog.map(
       category === "Running"
         ? `${name} combines breathable comfort, responsive cushioning, and stable support for runs, walks, and active days.`
         : `${name} is designed for daily wear with cushioned comfort, a versatile profile, and an easy-to-style finish.`,
+    fitNote:
+      category === "Running"
+        ? "Secure through the heel with comfortable room at the toes."
+        : "Fits true to size for most feet.",
+    fit: "True to size",
+    width: "Standard",
+    materials:
+      category === "Running"
+        ? "Breathable textile upper, cushioned foam midsole, rubber outsole."
+        : "Easy-care synthetic upper, cushioned insole, rubber outsole.",
+    care: "Wipe gently with a damp cloth and air dry away from direct heat.",
+    merchandisingLabel: index < 2 ? "New rotation" : "",
     featured: [0, 2, 3, 5].includes(index),
     published: true,
     archived: false,
