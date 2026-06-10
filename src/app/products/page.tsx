@@ -6,25 +6,18 @@ import { getProducts } from "@/lib/catalog";
 
 export const metadata: Metadata = {
   title: "Products",
-  description: "Browse Shoesco sneakers and running shoes.",
+  description: "Browse Shoesoco sneakers and running shoes.",
 };
 
-type ProductsPageProps = {
-  searchParams: Promise<{ category?: string }>;
-};
-
-export default async function ProductsPage({ searchParams }: ProductsPageProps) {
-  const { category } = await searchParams;
+export default async function ProductsPage() {
   const products = await getProducts();
-  const initialCategory =
-    category === "Sneakers" || category === "Running" ? category : "All";
 
   return (
     <Container className="pb-20 pt-6 sm:pb-28 sm:pt-8">
-      <div className="relative overflow-hidden rounded-[2rem] bg-[#e8e3d9] px-6 py-12 sm:px-12 sm:py-16">
-        <div className="absolute -right-16 -top-28 h-80 w-80 rounded-full bg-white/60 blur-3xl" />
+      <div className="relative overflow-hidden rounded-[2rem] bg-[#181b21] px-6 py-12 sm:px-12 sm:py-16">
+        <div className="absolute -right-16 -top-28 h-80 w-80 rounded-full bg-[#181b21]/60 blur-3xl" />
         <div className="relative max-w-2xl">
-          <p className="eyebrow">Shoesco collection</p>
+          <p className="eyebrow">Shoesoco collection</p>
           <h1 className="mt-4 text-4xl font-semibold tracking-[-0.045em] sm:text-6xl">
             Find the pair that fits your pace.
           </h1>
@@ -34,7 +27,7 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
           </p>
         </div>
       </div>
-      <ProductCatalog initialCategory={initialCategory} products={products} />
+      <ProductCatalog products={products} />
     </Container>
   );
 }

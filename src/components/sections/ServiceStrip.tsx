@@ -8,14 +8,14 @@ const services = [
 
 export function ServiceStrip() {
   return (
-    <section className="border-y border-neutral-200/80 bg-white">
+    <section className="border-y border-neutral-200/80 bg-[#181b21]">
       <Container className="grid divide-y divide-neutral-200 md:grid-cols-3 md:divide-x md:divide-y-0">
         {services.map(([number, title, description]) => (
           <div
             className="flex gap-5 py-7 md:px-8 md:first:pl-0 md:last:pr-0 lg:py-9"
             key={number}
           >
-            <span className="pt-0.5 text-xs font-bold text-[#aa7d4a]">
+            <span className="pt-0.5 text-xs font-bold text-[#c6ff3a]">
               {number}
             </span>
             <div>

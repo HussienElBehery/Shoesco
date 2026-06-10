@@ -4,16 +4,26 @@ import { Footer } from "@/components/layout/Footer";
 import { FloatingWhatsAppButton } from "@/components/layout/FloatingWhatsAppButton";
 import { Navbar } from "@/components/layout/Navbar";
 import { CartProvider } from "@/components/cart/CartProvider";
+import { MiniCartDrawer } from "@/components/cart/MiniCartDrawer";
 import { SiteChrome } from "@/components/layout/SiteChrome";
 
 import "./globals.css";
 
 export const metadata: Metadata = {
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_SITE_URL ?? "https://shoesoco.example",
+  ),
   title: {
-    default: "Shoesco",
-    template: "%s | Shoesco",
+    default: "Shoesoco",
+    template: "%s | Shoesoco",
   },
-  description: "Browse Shoesco footwear and order directly through WhatsApp.",
+  description: "Browse Shoesoco footwear and order directly through WhatsApp.",
+  openGraph: {
+    title: "Shoesoco",
+    description: "Everyday sneakers and running shoes selected for comfort and clean design.",
+    type: "website",
+  },
+  twitter: { card: "summary_large_image" },
 };
 
 export default function RootLayout({
@@ -22,9 +32,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html data-scroll-behavior="smooth" lang="en">
       <body>
         <CartProvider>
+          <MiniCartDrawer />
           <SiteChrome
             floatingButton={<FloatingWhatsAppButton />}
             footer={<Footer />}

@@ -14,7 +14,7 @@ export function createWhatsAppLink({
   return `https://wa.me/${digitsOnlyPhoneNumber}?text=${encodeURIComponent(message)}`;
 }
 
-export function createShoescoWhatsAppLink(message: string): string {
+export function createShoesocoWhatsAppLink(message: string): string {
   return createWhatsAppLink({
     phoneNumber: siteConfig.whatsappNumber,
     message,

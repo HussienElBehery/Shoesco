@@ -28,14 +28,17 @@ export default async function AdminSettingsPage({
   return (
     <AdminShell>
       <p className="eyebrow">Website content</p><h1 className="mt-3 text-4xl font-semibold">Store settings</h1>
-      <form action={saveSettings} className="mt-8 max-w-3xl rounded-[1.75rem] bg-white p-6 sm:p-8">
+      <form action={saveSettings} className="mt-8 max-w-3xl rounded-[1.75rem] bg-[#181b21] p-6 sm:p-8">
         <div className="grid gap-5 sm:grid-cols-2">
           {fields.map(([name, label, value]) => <label className="text-sm font-semibold" key={name}>{label}<input className="mt-2 h-12 w-full rounded-xl border px-4" defaultValue={value} name={name} required /></label>)}
         </div>
         <label className="mt-5 block text-sm font-semibold">Homepage description<textarea className="mt-2 min-h-28 w-full rounded-xl border p-4" defaultValue={settings.heroDescription} name="heroDescription" required /></label>
-        <button className="mt-7 rounded-full bg-neutral-950 px-6 py-3.5 text-sm font-semibold text-white" type="submit">Save settings</button>
+        <label className="mt-5 block text-sm font-semibold">Delivery note<textarea className="mt-2 min-h-24 w-full rounded-xl border p-4" defaultValue={settings.deliveryNote} name="deliveryNote" required /></label>
+        <label className="mt-5 block text-sm font-semibold">Exchange note<textarea className="mt-2 min-h-24 w-full rounded-xl border p-4" defaultValue={settings.returnsNote} name="returnsNote" required /></label>
+        <label className="mt-5 block text-sm font-semibold">Size guide note<textarea className="mt-2 min-h-24 w-full rounded-xl border p-4" defaultValue={settings.sizeGuideNote} name="sizeGuideNote" required /></label>
+        <button className="mt-7 rounded-full bg-neutral-950 px-6 py-3.5 text-sm font-semibold text-[#f4f1ea]" type="submit">Save settings</button>
       </form>
-      <form action={changeOwnerPassword} className="mt-6 max-w-3xl rounded-[1.75rem] bg-white p-6 sm:p-8">
+      <form action={changeOwnerPassword} className="mt-6 max-w-3xl rounded-[1.75rem] bg-[#181b21] p-6 sm:p-8">
         <h2 className="text-xl font-semibold">Change owner password</h2>
         <p className="mt-2 text-sm text-neutral-500">
           Use at least eight characters with uppercase, lowercase, numbers, and symbols.

@@ -3,11 +3,9 @@ import Link from "next/link";
 import { ProductGrid } from "@/components/product/ProductGrid";
 import { ArrowIcon } from "@/components/ui/ArrowIcon";
 import { Container } from "@/components/ui/Container";
-import { getFeaturedProducts } from "@/lib/products";
+import type { Product } from "@/types/product";
 
-export async function FeaturedProductsSection() {
-  const featuredProducts = await getFeaturedProducts();
-
+export function FeaturedProductsSection({ products }: { products: Product[] }) {
   return (
     <section className="py-20 sm:py-28">
       <Container>
@@ -31,7 +29,7 @@ export async function FeaturedProductsSection() {
             <ArrowIcon className="h-4 w-4" />
           </Link>
         </div>
-        <ProductGrid className="mt-10" products={featuredProducts} />
+        <ProductGrid className="mt-10" products={products} />
       </Container>
     </section>
   );

@@ -22,11 +22,11 @@ export default async function AdminPage() {
       <p className="eyebrow">Owner dashboard</p>
       <div className="mt-3 flex flex-wrap items-end justify-between gap-5">
         <div><h1 className="text-4xl font-semibold">Catalog overview</h1><p className="mt-2 text-neutral-600">Manage what customers see and order.</p></div>
-        <Link className="rounded-full bg-neutral-950 px-5 py-3 text-sm font-semibold text-white" href="/admin/products/new">Add a shoe</Link>
+        <Link className="rounded-full bg-neutral-950 px-5 py-3 text-sm font-semibold text-[#f4f1ea]" href="/admin/products/new">Add a shoe</Link>
       </div>
       <div className="mt-10 grid gap-4 sm:grid-cols-3">
         {[["Products", products.filter((p) => !p.archived).length], ["Published", products.filter((p) => p.published && !p.archived).length], ["Featured", products.filter((p) => p.featured && !p.archived).length]].map(([label, value]) => (
-          <div className="rounded-2xl bg-white p-6" key={label}><p className="text-sm text-neutral-500">{label}</p><strong className="mt-3 block text-4xl">{value}</strong></div>
+          <div className="rounded-2xl bg-[#181b21] p-6" key={label}><p className="text-sm text-neutral-500">{label}</p><strong className="mt-3 block text-4xl">{value}</strong></div>
         ))}
       </div>
     </AdminShell>

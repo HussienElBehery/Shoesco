@@ -6,7 +6,7 @@ import { getStoreSettings } from "@/lib/catalog";
 
 export const metadata: Metadata = {
   title: "Cart",
-  description: "Review your Shoesco selection and order through WhatsApp.",
+  description: "Review your Shoesoco selection and order through WhatsApp.",
 };
 
 export default async function CartPage() {

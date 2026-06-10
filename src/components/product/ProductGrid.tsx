@@ -5,9 +5,10 @@ import type { Product } from "@/types/product";
 type ProductGridProps = {
   products: Product[];
   className?: string;
+  onQuickView?: (product: Product) => void;
 };
 
-export function ProductGrid({ products, className }: ProductGridProps) {
+export function ProductGrid({ products, className, onQuickView }: ProductGridProps) {
   if (products.length === 0) {
     return (
       <p className={cn("text-neutral-600", className)}>
@@ -19,12 +20,12 @@ export function ProductGrid({ products, className }: ProductGridProps) {
   return (
     <div
       className={cn(
-        "grid gap-x-6 gap-y-14 sm:grid-cols-2 lg:grid-cols-3",
+        "grid min-w-0 gap-x-6 gap-y-14 sm:grid-cols-2 lg:grid-cols-3",
         className,
       )}
     >
       {products.map((product) => (
-        <ProductCard key={product.id} product={product} />
+        <ProductCard key={product.id} onQuickView={onQuickView} product={product} />
       ))}
     </div>
   );

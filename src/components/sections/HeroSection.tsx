@@ -1,66 +1,84 @@
+import Image from "next/image";
 import Link from "next/link";
 
 import { HeroShoeCarousel } from "@/components/sections/HeroShoeCarousel";
 import { ArrowIcon } from "@/components/ui/ArrowIcon";
 import { Container } from "@/components/ui/Container";
-import type { StoreSettings } from "@/types/product";
+import type { Product, StoreSettings } from "@/types/product";
 
-export function HeroSection({ settings }: { settings: StoreSettings }) {
+export function HeroSection({
+  settings,
+  products,
+}: {
+  settings: StoreSettings;
+  products: Product[];
+}) {
   return (
     <section className="overflow-hidden pb-8 pt-5 sm:pb-12 sm:pt-8">
       <Container>
-        <div className="relative min-h-[650px] overflow-hidden rounded-[2rem] border border-white/60 bg-[#e9e4da] px-6 py-12 shadow-[0_25px_80px_rgba(48,42,32,0.08)] sm:px-12 lg:min-h-[680px] lg:px-16 lg:py-16">
-          <div className="absolute inset-0 bg-[linear-gradient(115deg,rgba(255,255,255,0.35),transparent_48%)]" />
-          <div className="absolute -right-28 -top-40 h-[480px] w-[480px] rounded-full bg-white/55 blur-3xl" />
-          <div className="absolute -bottom-56 left-1/4 h-[480px] w-[480px] rounded-full bg-[#c4a77e]/30 blur-3xl" />
+        <div className="relative overflow-hidden rounded-[2rem] border border-[#2a2e36] bg-[#181b21] px-6 py-9 shadow-[0_25px_80px_rgba(0,0,0,0.28)] sm:px-12 sm:py-12 lg:min-h-[700px] lg:px-14 lg:py-12">
+          <div className="absolute inset-0 bg-[linear-gradient(115deg,rgba(244,241,234,0.04),transparent_42%,rgba(198,255,58,0.04))]" />
+          <div className="absolute -right-28 -top-40 h-[480px] w-[480px] rounded-full bg-[#2a2e36]/70 blur-3xl" />
+          <div className="absolute -bottom-56 left-1/3 h-[520px] w-[520px] rounded-full bg-[#c6ff3a]/20 blur-3xl" />
 
-          <div className="relative z-10 max-w-2xl lg:max-w-[52%]">
-            <p className="eyebrow">
-              {settings.heroEyebrow}
-            </p>
-            <h1 className="mt-6 text-5xl font-semibold leading-[0.98] tracking-[-0.055em] sm:text-6xl lg:text-8xl">
-              {settings.heroTitle}
-            </h1>
-            <p className="mt-7 max-w-lg text-base leading-7 text-neutral-600 sm:text-lg">
-              {settings.heroDescription}
-            </p>
-            <div className="mt-9 flex flex-wrap gap-3">
-              <Link
-                className="inline-flex items-center gap-3 rounded-full bg-neutral-950 px-6 py-3.5 text-sm font-semibold text-white transition hover:bg-[#9a7042]"
-                href="/products"
-              >
-                Shop the collection
-                <ArrowIcon className="h-4 w-4" />
-              </Link>
-              <Link
-                className="rounded-full border border-neutral-500/30 bg-white/30 px-6 py-3.5 text-sm font-semibold backdrop-blur transition hover:bg-white/70"
-                href="/about"
-              >
-                Our story
-              </Link>
+          <div className="relative z-10 mb-8 flex items-center gap-4 border-b border-[#2a2e36] pb-6 sm:mb-10">
+            <span className="h-2.5 w-2.5 rounded-full bg-[#c6ff3a] shadow-[0_0_24px_rgba(198,255,58,0.7)]" />
+            <div className="relative h-12 w-28 sm:h-14 sm:w-32">
+              <Image
+                alt="Shoesoco"
+                className="object-contain object-left"
+                fill
+                sizes="128px"
+                src="/images/Logo-transparent.png"
+              />
             </div>
-            <div className="mt-10 flex items-center gap-6 border-t border-black/10 pt-5 text-xs text-neutral-500">
-              <span>
-                <strong className="block text-base text-neutral-950">2</strong>
-                Focused categories
-              </span>
-              <span className="h-8 w-px bg-black/10" />
-              <span>
-                <strong className="block text-base text-neutral-950">Direct</strong>
-                WhatsApp service
-              </span>
-            </div>
-          </div>
-
-          <div className="relative z-[5] mt-14 h-48 w-full sm:h-64 md:absolute md:bottom-20 md:right-[-3%] md:mt-0 md:h-[270px] md:w-[56%] lg:bottom-24 lg:right-[-1%] lg:h-[330px] lg:w-[55%]">
-            <HeroShoeCarousel />
-          </div>
-
-          <div className="absolute bottom-6 right-6 z-10 hidden rounded-2xl border border-white/70 bg-white/75 px-4 py-3 text-xs font-semibold shadow-lg backdrop-blur md:bottom-10 md:right-10 md:block">
-            Selected for comfort
-            <span className="mt-1 block font-normal text-neutral-500">
-              Designed for daily movement
+            <span className="ml-auto text-[10px] font-bold uppercase tracking-[0.2em] text-neutral-500">
+              Cairo / Est. 2026
             </span>
+          </div>
+
+          <div className="relative z-10 grid items-center gap-10 lg:min-h-[550px] lg:grid-cols-[0.88fr_1.12fr] lg:gap-10">
+            <div className="max-w-2xl">
+              <p className="eyebrow">
+                {settings.heroEyebrow}
+              </p>
+              <h1 className="mt-6 text-5xl font-semibold leading-[0.98] tracking-[-0.055em] sm:text-6xl lg:text-7xl">
+                {settings.heroTitle}
+              </h1>
+              <p className="mt-7 max-w-lg text-base leading-7 text-neutral-600 sm:text-lg">
+                {settings.heroDescription}
+              </p>
+              <div className="mt-9 flex flex-wrap gap-3">
+                <Link
+                  className="inline-flex items-center gap-3 rounded-full bg-neutral-950 px-6 py-3.5 text-sm font-semibold text-[#f4f1ea] transition hover:bg-[#c6ff3a] hover:text-[#0f1115]"
+                  href="/products"
+                >
+                  Shop the collection
+                  <ArrowIcon className="h-4 w-4" />
+                </Link>
+                <Link
+                  className="rounded-full border border-neutral-500/30 bg-[#181b21]/30 px-6 py-3.5 text-sm font-semibold backdrop-blur transition hover:bg-[#181b21]/70"
+                  href="/about"
+                >
+                  Our story
+                </Link>
+              </div>
+              <div className="mt-10 flex items-center gap-6 border-t border-[#2a2e36] pt-5 text-xs text-neutral-500">
+                <span>
+                  <strong className="block text-base text-[#f4f1ea]">2</strong>
+                  Focused categories
+                </span>
+                <span className="h-8 w-px bg-[#2a2e36]" />
+                <span>
+                  <strong className="block text-base text-[#f4f1ea]">Direct</strong>
+                  WhatsApp service
+                </span>
+              </div>
+            </div>
+
+            <div className="relative h-[360px] min-w-0 sm:h-[430px] lg:h-[520px]">
+              <HeroShoeCarousel products={products} />
+            </div>
           </div>
         </div>
       </Container>

@@ -7,7 +7,7 @@ import { Container } from "@/components/ui/Container";
 
 export const metadata: Metadata = {
   title: "About",
-  description: "Learn about Shoesco and our approach to everyday footwear.",
+  description: "Learn about Shoesoco and our approach to everyday footwear.",
 };
 
 const values = [
@@ -35,24 +35,24 @@ export default function AboutPage() {
         <Container>
           <div className="grid gap-10 lg:grid-cols-[1.1fr_0.9fr] lg:items-end">
             <div>
-              <p className="eyebrow">About Shoesco</p>
+              <p className="eyebrow">About Shoesoco</p>
               <h1 className="mt-5 max-w-3xl text-4xl font-semibold leading-tight tracking-[-0.04em] sm:text-6xl">
                 Good shoes should make every day feel better.
               </h1>
             </div>
             <p className="max-w-xl text-base leading-8 text-neutral-600 sm:text-lg">
-              Shoesco is focused on sneakers and running shoes: two essential
+              Shoesoco is focused on sneakers and running shoes: two essential
               categories selected for dependable comfort, clean design, and
               straightforward personal service.
             </p>
           </div>
 
-          <div className="relative mt-14 min-h-[360px] overflow-hidden rounded-[2rem] bg-[#ded7c9] sm:min-h-[500px]">
-            <div className="absolute -left-20 -top-20 h-80 w-80 rounded-full bg-white/60 blur-3xl" />
+          <div className="relative mt-14 min-h-[360px] overflow-hidden rounded-[2rem] bg-[#181b21] sm:min-h-[500px]">
+            <div className="absolute -left-20 -top-20 h-80 w-80 rounded-full bg-[#181b21]/60 blur-3xl" />
             <div className="absolute bottom-[12%] left-[8%] h-12 w-[70%] rounded-full bg-black/20 blur-2xl" />
             <div className="absolute inset-8 sm:inset-12">
               <Image
-                alt="Shoesco sneaker"
+                alt="Shoesoco sneaker"
                 className="-rotate-6 object-contain drop-shadow-[0_40px_45px_rgba(41,34,25,0.22)]"
                 fill
                 priority
@@ -67,12 +67,12 @@ export default function AboutPage() {
         </Container>
       </section>
 
-      <section className="border-y border-neutral-200 bg-[#171918] py-16 text-white sm:py-24">
+      <section className="border-y border-neutral-200 bg-[#0f1115] py-16 text-[#f4f1ea] sm:py-24">
         <Container>
           <div className="grid gap-10 md:grid-cols-3">
             {values.map((value) => (
-              <article className="border-t border-white/15 pt-6" key={value.number}>
-                <p className="text-xs font-bold text-[#c99b68]">
+              <article className="border-t border-[#2a2e36]/15 pt-6" key={value.number}>
+                <p className="text-xs font-bold text-[#c6ff3a]">
                   {value.number}
                 </p>
                 <h2 className="mt-5 text-2xl font-semibold">{value.title}</h2>
@@ -89,7 +89,7 @@ export default function AboutPage() {
             Meet your next everyday pair.
           </h2>
           <Link
-            className="mt-7 inline-flex items-center gap-3 rounded-full bg-neutral-950 px-6 py-3.5 text-sm font-semibold text-white"
+            className="mt-7 inline-flex items-center gap-3 rounded-full bg-neutral-950 px-6 py-3.5 text-sm font-semibold text-[#f4f1ea]"
             href="/products"
           >
             Explore products
