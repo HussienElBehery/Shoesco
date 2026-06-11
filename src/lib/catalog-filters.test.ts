@@ -35,6 +35,13 @@ describe("catalog filters", () => {
     expect(result.every((product) => product.category === "Running")).toBe(true);
   });
 
+  it("recognizes the Shoe Care category in URL state", () => {
+    const filters = parseCatalogFilters(
+      new URLSearchParams("category=Shoe+Care"),
+    );
+    expect(filters.category).toBe("Shoe Care");
+  });
+
   it("sorts products by ascending price", () => {
     const result = filterAndSortProducts(products, {
       ...defaultCatalogFilters,

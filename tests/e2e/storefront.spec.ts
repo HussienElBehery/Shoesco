@@ -23,7 +23,7 @@ test("shows the Shoesoco intro and balanced hero categories", async ({ page }) =
 
 test("filters products and opens quick preview", async ({ page }) => {
   await page.goto("/products");
-  await page.getByPlaceholder("Search shoes, colors, or collections").fill("runner");
+  await page.getByPlaceholder("Search products, colors, or collections").fill("runner");
   await expect(page.getByText(/product/).first()).toBeVisible();
   const card = page.locator("article").first();
   await card.hover();
@@ -37,4 +37,22 @@ test("adds a product and opens the mini cart", async ({ page }) => {
   await page.getByRole("button", { name: "Add to cart" }).click();
   await expect(page.getByRole("dialog", { name: "Added to your rotation" })).toBeVisible();
   await expect(page.getByRole("link", { name: "View cart" })).toBeVisible();
+});
+
+test("shows the complete guest order form in the cart", async ({ page }) => {
+  await page.goto("/products");
+  await page.locator("article a").first().click();
+  await page.getByRole("button", { name: "Add to cart" }).click();
+  await page.getByRole("link", { name: "View cart" }).click();
+
+  await expect(page.getByLabel("Name")).toBeVisible();
+  await expect(page.getByLabel("Email")).toBeVisible();
+  await expect(page.getByLabel("Phone number")).toBeVisible();
+  await expect(page.getByLabel("Delivery area")).toBeVisible();
+  await expect(page.getByLabel("Full delivery address")).toBeVisible();
+  await expect(
+    page.getByRole("button", {
+      name: "Save order and continue to WhatsApp",
+    }),
+  ).toBeDisabled();
 });

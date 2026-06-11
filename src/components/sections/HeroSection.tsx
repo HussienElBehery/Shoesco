@@ -1,4 +1,3 @@
-import Image from "next/image";
 import Link from "next/link";
 
 import { HeroShoeCarousel } from "@/components/sections/HeroShoeCarousel";
@@ -21,23 +20,7 @@ export function HeroSection({
           <div className="absolute -right-28 -top-40 h-[480px] w-[480px] rounded-full bg-[#2a2e36]/70 blur-3xl" />
           <div className="absolute -bottom-56 left-1/3 h-[520px] w-[520px] rounded-full bg-[#c6ff3a]/20 blur-3xl" />
 
-          <div className="relative z-10 mb-8 flex items-center gap-4 border-b border-[#2a2e36] pb-6 sm:mb-10">
-            <span className="h-2.5 w-2.5 rounded-full bg-[#c6ff3a] shadow-[0_0_24px_rgba(198,255,58,0.7)]" />
-            <div className="relative h-12 w-28 sm:h-14 sm:w-32">
-              <Image
-                alt="Shoesoco"
-                className="object-contain object-left"
-                fill
-                sizes="128px"
-                src="/images/Logo-transparent.png"
-              />
-            </div>
-            <span className="ml-auto text-[10px] font-bold uppercase tracking-[0.2em] text-neutral-500">
-              Cairo / Est. 2026
-            </span>
-          </div>
-
-          <div className="relative z-10 grid items-center gap-10 lg:min-h-[550px] lg:grid-cols-[0.88fr_1.12fr] lg:gap-10">
+          <div className="relative z-10 grid items-center gap-10 lg:min-h-[600px] lg:grid-cols-[0.88fr_1.12fr] lg:gap-10">
             <div className="max-w-2xl">
               <p className="eyebrow">
                 {settings.heroEyebrow}
@@ -65,7 +48,7 @@ export function HeroSection({
               </div>
               <div className="mt-10 flex items-center gap-6 border-t border-[#2a2e36] pt-5 text-xs text-neutral-500">
                 <span>
-                  <strong className="block text-base text-[#f4f1ea]">2</strong>
+                  <strong className="block text-base text-[#f4f1ea]">3</strong>
                   Focused categories
                 </span>
                 <span className="h-8 w-px bg-[#2a2e36]" />

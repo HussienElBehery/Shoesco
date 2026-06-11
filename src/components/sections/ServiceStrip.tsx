@@ -1,7 +1,7 @@
 import { Container } from "@/components/ui/Container";
 
 const services = [
-  ["01", "Two focused categories", "Sneakers and running shoes, chosen well."],
+  ["01", "Three focused categories", "Footwear and shoe care, chosen well."],
   ["02", "Personal sizing", "Talk directly with us before you order."],
   ["03", "Easy ordering", "Reserve your pair quickly through WhatsApp."],
 ];

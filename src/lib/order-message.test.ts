@@ -21,11 +21,20 @@ describe("order message", () => {
     const message = createOrderMessage({
       items: [item],
       subtotal: 6000,
-      details: { customerName: "Customer", deliveryArea: "Cairo", notes: "Call first" },
+      details: {
+        customerName: "Customer",
+        customerEmail: "customer@example.com",
+        customerPhone: "+20 100 000 0000",
+        deliveryArea: "Cairo",
+        deliveryAddress: "12 Example Street",
+        notes: "Call first",
+      },
       origin: "https://example.com",
     });
     expect(message).toContain("Size: 40 | Color: White | Qty: 2");
     expect(message).toContain("Customer: Customer");
+    expect(message).toContain("Email: customer@example.com");
+    expect(message).toContain("Address: 12 Example Street");
     expect(message).toContain("https://example.com/products/p");
   });
 });

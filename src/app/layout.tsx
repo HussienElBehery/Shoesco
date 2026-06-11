@@ -18,6 +18,9 @@ export const metadata: Metadata = {
     template: "%s | Shoesoco",
   },
   description: "Browse Shoesoco footwear and order directly through WhatsApp.",
+  icons: {
+    icon: "/images/Logo-transparent.png",
+  },
   openGraph: {
     title: "Shoesoco",
     description: "Everyday sneakers and running shoes selected for comfort and clean design.",

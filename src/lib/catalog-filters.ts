@@ -35,7 +35,11 @@ export function parseCatalogFilters(params: URLSearchParams): CatalogFilters {
   return {
     query: params.get("q") ?? "",
     category:
-      category === "Sneakers" || category === "Running" ? category : "All",
+      category === "Sneakers" ||
+      category === "Running" ||
+      category === "Shoe Care"
+        ? category
+        : "All",
     gender:
       gender === "Men" || gender === "Women" || gender === "Unisex"
         ? gender

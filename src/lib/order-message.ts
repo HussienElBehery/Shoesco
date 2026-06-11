@@ -6,14 +6,17 @@ export function createOrderMessage({
   subtotal,
   details,
   origin = "",
+  reference,
 }: {
   items: CartItem[];
   subtotal: number;
   details: WhatsAppOrderDetails;
   origin?: string;
+  reference?: string;
 }) {
   return [
     "Hello Shoesoco, I would like to order:",
+    reference ? `Order reference: ${reference}` : "",
     "",
     ...items.map(
       (item, index) =>
@@ -23,7 +26,10 @@ export function createOrderMessage({
     `Subtotal: ${formatPrice(subtotal, "EGP")}`,
     "",
     `Customer: ${details.customerName}`,
+    `Email: ${details.customerEmail}`,
+    `Phone: ${details.customerPhone}`,
     `Delivery area: ${details.deliveryArea}`,
+    `Address: ${details.deliveryAddress}`,
     details.notes ? `Notes: ${details.notes}` : "",
     "",
     "Please confirm availability, delivery timing, and delivery cost.",
