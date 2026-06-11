@@ -133,5 +133,9 @@ export const getStoreSettings = cache(async (): Promise<StoreSettings> => {
     deliveryNote: data.delivery_note ?? siteConfig.deliveryNote,
     returnsNote: data.returns_note ?? siteConfig.returnsNote,
     sizeGuideNote: data.size_guide_note ?? siteConfig.sizeGuideNote,
+    orderReplyEnabled:
+      data.order_reply_enabled ?? siteConfig.orderReplyEnabled,
+    orderReplyTemplate:
+      data.order_reply_template ?? siteConfig.orderReplyTemplate,
   };
 });

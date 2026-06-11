@@ -4,15 +4,21 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
 import { requireAdmin } from "@/lib/admin";
+import { ORDER_STATUSES } from "@/lib/orders";
 import { createClient } from "@/lib/supabase/server";
+import type { OrderStatus } from "@/types/product";
 
 function text(formData: FormData, key: string) {
   return String(formData.get(key) ?? "").trim();
 }
 
 function productValues(formData: FormData) {
+  const category = text(formData, "category");
   const fit = text(formData, "fit");
   const width = text(formData, "width");
+  if (!["Sneakers", "Running", "Shoe Care"].includes(category)) {
+    throw new Error("Select a valid category.");
+  }
   if (!["Narrow", "True to size", "Roomy"].includes(fit)) {
     throw new Error("Select a valid fit.");
   }
@@ -23,7 +29,7 @@ function productValues(formData: FormData) {
     slug: text(formData, "slug").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, ""),
     name: text(formData, "name"),
     price_egp: Math.max(0, Number(text(formData, "price")) || 0),
-    category: text(formData, "category"),
+    category,
     gender: text(formData, "gender"),
     colors: text(formData, "colors").split(",").map((value) => value.trim()).filter(Boolean),
     short_description: text(formData, "shortDescription"),
@@ -203,6 +209,10 @@ export async function restoreProduct(formData: FormData) {
 export async function saveSettings(formData: FormData) {
   const admin = await requireAdmin();
   if (!admin) redirect("/admin?setup=required");
+  const replyTemplate = text(formData, "orderReplyTemplate");
+  if (!replyTemplate || replyTemplate.length > 1000) {
+    throw new Error("The WhatsApp reply template must be between 1 and 1000 characters.");
+  }
   const { error } = await admin.supabase
     .from("store_settings")
     .update({
@@ -219,6 +229,8 @@ export async function saveSettings(formData: FormData) {
       delivery_note: text(formData, "deliveryNote"),
       returns_note: text(formData, "returnsNote"),
       size_guide_note: text(formData, "sizeGuideNote"),
+      order_reply_enabled: formData.get("orderReplyEnabled") === "on",
+      order_reply_template: replyTemplate,
       updated_at: new Date().toISOString(),
     })
     .eq("id", 1);
@@ -226,6 +238,50 @@ export async function saveSettings(formData: FormData) {
   revalidatePath("/");
   revalidatePath("/contact");
   redirect("/admin/settings?saved=1");
+}
+
+export async function updateOrder(formData: FormData) {
+  const admin = await requireAdmin();
+  if (!admin) redirect("/admin?setup=required");
+  const id = text(formData, "id");
+  const status = text(formData, "status") as OrderStatus;
+  const internalNotes = text(formData, "internalNotes");
+  if (!ORDER_STATUSES.includes(status) || internalNotes.length > 1000) {
+    throw new Error("Invalid order update.");
+  }
+
+  const { data: current, error: readError } = await admin.supabase
+    .from("orders")
+    .select("status")
+    .eq("id", id)
+    .single();
+  if (readError) throw readError;
+
+  const { error } = await admin.supabase
+    .from("orders")
+    .update({
+      status,
+      internal_notes: internalNotes,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", id);
+  if (error) throw error;
+
+  if (current.status !== status) {
+    const { error: eventError } = await admin.supabase
+      .from("order_events")
+      .insert({
+        order_id: id,
+        event_type: "status_changed",
+        description: `Status changed from ${current.status} to ${status}.`,
+      });
+    if (eventError) throw eventError;
+  }
+
+  revalidatePath("/admin");
+  revalidatePath("/admin/orders");
+  revalidatePath(`/admin/orders/${id}`);
+  redirect(`/admin/orders/${id}?saved=1`);
 }
 
 export async function changeOwnerPassword(formData: FormData) {

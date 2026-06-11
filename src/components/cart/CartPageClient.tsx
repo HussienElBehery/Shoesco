@@ -6,23 +6,31 @@ import { useEffect, useState } from "react";
 
 import { useCart } from "@/components/cart/CartProvider";
 import { formatPrice } from "@/lib/format";
-import { createWhatsAppLink } from "@/lib/whatsapp";
-import { createOrderMessage } from "@/lib/order-message";
 import { trackEvent } from "@/lib/analytics";
-import type { StoreSettings, WhatsAppOrderDetails } from "@/types/product";
+import type { WhatsAppOrderDetails } from "@/types/product";
 
-export function CartPageClient({ settings }: { settings: StoreSettings }) {
+export function CartPageClient() {
   const { items, subtotal, updateQuantity, removeItem, clearCart, replaceVariant } = useCart();
   const [details, setDetails] = useState<WhatsAppOrderDetails>({
     customerName: "",
+    customerEmail: "",
+    customerPhone: "",
     deliveryArea: "",
+    deliveryAddress: "",
     notes: "",
   });
-  const [origin, setOrigin] = useState("");
+  const [checkoutToken, setCheckoutToken] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     const timeout = window.setTimeout(() => {
-      setOrigin(window.location.origin);
+      const storedToken = window.sessionStorage.getItem(
+        "shoesoco-checkout-token-v1",
+      );
+      const token = storedToken || window.crypto.randomUUID();
+      setCheckoutToken(token);
+      window.sessionStorage.setItem("shoesoco-checkout-token-v1", token);
       try {
         const saved =
           window.localStorage.getItem("shoesoco-checkout-details-v1") ??
@@ -31,7 +39,10 @@ export function CartPageClient({ settings }: { settings: StoreSettings }) {
           const parsed = JSON.parse(saved) as Partial<WhatsAppOrderDetails>;
           setDetails({
             customerName: typeof parsed.customerName === "string" ? parsed.customerName : "",
+            customerEmail: typeof parsed.customerEmail === "string" ? parsed.customerEmail : "",
+            customerPhone: typeof parsed.customerPhone === "string" ? parsed.customerPhone : "",
             deliveryArea: typeof parsed.deliveryArea === "string" ? parsed.deliveryArea : "",
+            deliveryAddress: typeof parsed.deliveryAddress === "string" ? parsed.deliveryAddress : "",
             notes: typeof parsed.notes === "string" ? parsed.notes : "",
           });
           window.localStorage.removeItem("shoe" + "sco-checkout-details-v1");
@@ -51,12 +62,59 @@ export function CartPageClient({ settings }: { settings: StoreSettings }) {
     );
   }, [details]);
 
-  const message = createOrderMessage({ items, subtotal, details, origin });
-
-  const canOrder =
+  const canOrder = Boolean(
     items.length > 0 &&
+    checkoutToken &&
     details.customerName.trim() &&
-    details.deliveryArea.trim();
+    details.customerEmail.trim() &&
+    details.customerPhone.trim() &&
+    details.deliveryArea.trim() &&
+    details.deliveryAddress.trim(),
+  );
+
+  async function submitOrder() {
+    if (!canOrder || submitting) return;
+    setSubmitting(true);
+    setError("");
+    try {
+      const response = await fetch("/api/orders", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          checkoutToken,
+          details,
+          items: items.map((item) => ({
+            productId: item.productId,
+            size: item.size,
+            color: item.color,
+            quantity: item.quantity,
+          })),
+        }),
+      });
+      const result = (await response.json()) as {
+        error?: string;
+        whatsappUrl?: string;
+      };
+      if (!response.ok || !result.whatsappUrl) {
+        throw new Error(result.error || "We could not save your order.");
+      }
+      trackEvent("whatsapp_checkout_click", {
+        itemCount: items.length,
+        subtotal,
+      });
+      clearCart();
+      window.localStorage.removeItem("shoesoco-checkout-details-v1");
+      window.sessionStorage.removeItem("shoesoco-checkout-token-v1");
+      window.location.assign(result.whatsappUrl);
+    } catch (submissionError) {
+      setError(
+        submissionError instanceof Error
+          ? submissionError.message
+          : "We could not save your order. Please try again.",
+      );
+      setSubmitting(false);
+    }
+  }
 
   if (items.length === 0) {
     return (
@@ -133,34 +191,48 @@ export function CartPageClient({ settings }: { settings: StoreSettings }) {
         <div className="mt-6 space-y-4">
           <label className="block text-sm">
             Name
-            <input className="mt-2 h-12 w-full rounded-xl border border-[#2a2e36] bg-[#0f1115]/70 px-4 outline-none transition focus:border-[#c6ff3a]" onChange={(event) => setDetails({ ...details, customerName: event.target.value })} required value={details.customerName} />
+            <input autoComplete="name" className="mt-2 h-12 w-full rounded-xl border border-[#2a2e36] bg-[#0f1115]/70 px-4 outline-none transition focus:border-[#c6ff3a]" maxLength={100} onChange={(event) => setDetails({ ...details, customerName: event.target.value })} required value={details.customerName} />
+          </label>
+          <label className="block text-sm">
+            Email
+            <input autoComplete="email" className="mt-2 h-12 w-full rounded-xl border border-[#2a2e36] bg-[#0f1115]/70 px-4 outline-none transition focus:border-[#c6ff3a]" maxLength={254} onChange={(event) => setDetails({ ...details, customerEmail: event.target.value })} required type="email" value={details.customerEmail} />
+          </label>
+          <label className="block text-sm">
+            Phone number
+            <input autoComplete="tel" className="mt-2 h-12 w-full rounded-xl border border-[#2a2e36] bg-[#0f1115]/70 px-4 outline-none transition focus:border-[#c6ff3a]" maxLength={20} onChange={(event) => setDetails({ ...details, customerPhone: event.target.value })} placeholder="+20 10 1234 5678" required type="tel" value={details.customerPhone} />
           </label>
           <label className="block text-sm">
             Delivery area
-            <input className="mt-2 h-12 w-full rounded-xl border border-[#2a2e36] bg-[#0f1115]/70 px-4 outline-none transition focus:border-[#c6ff3a]" onChange={(event) => setDetails({ ...details, deliveryArea: event.target.value })} required value={details.deliveryArea} />
+            <input autoComplete="address-level2" className="mt-2 h-12 w-full rounded-xl border border-[#2a2e36] bg-[#0f1115]/70 px-4 outline-none transition focus:border-[#c6ff3a]" maxLength={100} onChange={(event) => setDetails({ ...details, deliveryArea: event.target.value })} placeholder="District or city" required value={details.deliveryArea} />
+          </label>
+          <label className="block text-sm">
+            Full delivery address
+            <textarea autoComplete="street-address" className="mt-2 min-h-24 w-full rounded-xl border border-[#2a2e36] bg-[#0f1115]/70 p-4 outline-none transition focus:border-[#c6ff3a]" maxLength={300} onChange={(event) => setDetails({ ...details, deliveryAddress: event.target.value })} placeholder="Street, building, floor, and apartment" required value={details.deliveryAddress} />
           </label>
           <label className="block text-sm">
             Notes <span className="text-neutral-500">(optional)</span>
-            <textarea className="mt-2 min-h-24 w-full rounded-xl border border-[#2a2e36] bg-[#0f1115]/70 p-4 outline-none transition focus:border-[#c6ff3a]" onChange={(event) => setDetails({ ...details, notes: event.target.value })} value={details.notes} />
+            <textarea className="mt-2 min-h-24 w-full rounded-xl border border-[#2a2e36] bg-[#0f1115]/70 p-4 outline-none transition focus:border-[#c6ff3a]" maxLength={500} onChange={(event) => setDetails({ ...details, notes: event.target.value })} value={details.notes} />
           </label>
         </div>
         <div className="mt-7 flex items-center justify-between border-t border-[#2a2e36] pt-6">
           <span className="text-neutral-400">Subtotal</span>
           <strong className="text-xl">{formatPrice(subtotal, "EGP")}</strong>
         </div>
-        <a
+        {error && (
+          <p className="mt-5 rounded-xl border border-red-400/30 bg-red-400/10 p-3 text-sm text-red-200" role="alert">
+            {error}
+          </p>
+        )}
+        <button
           className={`mt-6 flex w-full items-center justify-center rounded-full px-6 py-4 text-sm font-semibold transition ${canOrder ? "bg-[#c6ff3a] text-[#0f1115] hover:bg-[#d4ff6b]" : "pointer-events-none bg-[#181b21]/10 text-[#f4f1ea]/40"}`}
-          href={canOrder ? createWhatsAppLink({ phoneNumber: settings.whatsappNumber, message }) : undefined}
-          onClick={() => {
-            if (canOrder) trackEvent("whatsapp_checkout_click", { itemCount: items.length, subtotal });
-          }}
-          rel="noreferrer"
-          target="_blank"
+          disabled={!canOrder || submitting}
+          onClick={submitOrder}
+          type="button"
         >
-          Send order on WhatsApp
-        </a>
+          {submitting ? "Saving your order..." : "Save order and continue to WhatsApp"}
+        </button>
         <p className="mt-4 text-xs leading-5 text-neutral-500">
-          Shoesoco will confirm availability and delivery cost in chat. No payment is taken on this website.
+          Submitting records your request with Shoesoco, then opens WhatsApp so you can send it. Availability, delivery cost, and timing are confirmed in chat. No payment is taken here.
         </p>
       </aside>
     </div>

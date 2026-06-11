@@ -55,11 +55,11 @@ export function ProductForm({ product }: { product?: Product }) {
           <label className="text-sm font-semibold">Product name<input className={inputClass} defaultValue={product?.name} name="name" required /></label>
           <label className="text-sm font-semibold">URL slug<input className={inputClass} defaultValue={product?.slug} name="slug" placeholder="urban-runner-white" required /></label>
           <label className="text-sm font-semibold">Price in EGP<input className={inputClass} defaultValue={product?.price} min="1" name="price" required type="number" /></label>
-          <label className="text-sm font-semibold">Category<select className={inputClass} defaultValue={product?.category ?? "Sneakers"} name="category"><option>Sneakers</option><option>Running</option></select></label>
+          <label className="text-sm font-semibold">Category<select className={inputClass} defaultValue={product?.category ?? "Sneakers"} name="category"><option>Sneakers</option><option>Running</option><option>Shoe Care</option></select></label>
           <label className="text-sm font-semibold">Gender<select className={inputClass} defaultValue={product?.gender ?? "Unisex"} name="gender"><option>Men</option><option>Women</option><option>Unisex</option></select></label>
           <label className="text-sm font-semibold">Colors, separated by commas<input className={inputClass} defaultValue={product?.colors.join(", ")} name="colors" required /></label>
-          <label className="text-sm font-semibold">Fit<select className={inputClass} defaultValue={product?.fit ?? "True to size"} name="fit"><option>Narrow</option><option>True to size</option><option>Roomy</option></select></label>
-          <label className="text-sm font-semibold">Width<select className={inputClass} defaultValue={product?.width ?? "Standard"} name="width"><option>Narrow</option><option>Standard</option><option>Wide</option></select></label>
+          <label className="text-sm font-semibold">Fit<select aria-label="Fit" className={inputClass} defaultValue={product?.fit ?? "True to size"} name="fit"><option>Narrow</option><option>True to size</option><option>Roomy</option></select></label>
+          <label className="text-sm font-semibold">Width<select aria-label="Width" className={inputClass} defaultValue={product?.width ?? "Standard"} name="width"><option>Narrow</option><option>Standard</option><option>Wide</option></select></label>
           <label className="text-sm font-semibold sm:col-span-2">Merchandising label<input className={inputClass} defaultValue={product?.merchandisingLabel} maxLength={40} name="merchandisingLabel" placeholder="New rotation" /></label>
         </div>
         <label className="mt-5 block text-sm font-semibold">Short description<input className={inputClass} defaultValue={product?.shortDescription} maxLength={180} name="shortDescription" required /></label>

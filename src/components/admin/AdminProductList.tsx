@@ -32,7 +32,7 @@ export function AdminProductList({ products }: { products: Product[] }) {
           value={query}
         />
         <div className="flex gap-2">
-          {(["All", "Sneakers", "Running"] as const).map((value) => (
+          {(["All", "Sneakers", "Running", "Shoe Care"] as const).map((value) => (
             <button
               className={`rounded-full px-4 py-2 text-xs font-semibold ${category === value ? "bg-neutral-950 text-[#f4f1ea]" : "bg-neutral-100"}`}
               key={value}

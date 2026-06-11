@@ -47,6 +47,7 @@ function FilterFields({
           <option value="All">All categories</option>
           <option value="Sneakers">Sneakers</option>
           <option value="Running">Running</option>
+          <option value="Shoe Care">Shoe Care</option>
         </select>
       </label>
       <label className="grid gap-2 text-xs font-semibold text-neutral-400">
@@ -130,7 +131,7 @@ export function ProductCatalog({ products }: { products: Product[] }) {
             <input
               className="h-12 w-full rounded-full border border-[#2a2e36] bg-[#181b21] px-5 text-sm placeholder:text-neutral-500"
               onChange={(event) => setFilters({ ...filters, query: event.target.value })}
-              placeholder="Search shoes, colors, or collections"
+              placeholder="Search products, colors, or collections"
               type="search"
               value={filters.query}
             />
@@ -172,7 +173,7 @@ export function ProductCatalog({ products }: { products: Product[] }) {
         <ProductGrid className="mt-8" onQuickView={setQuickView} products={filteredProducts} />
       ) : (
         <div className="mt-8 rounded-[1.75rem] border border-[#2a2e36] bg-[#181b21] px-6 py-16 text-center">
-          <h2 className="text-xl font-semibold">No matching shoes found</h2>
+          <h2 className="text-xl font-semibold">No matching products found</h2>
           <p className="mt-2 text-sm text-neutral-500">Try a wider price range or clear one of the filters.</p>
         </div>
       )}

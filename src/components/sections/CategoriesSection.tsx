@@ -29,6 +29,17 @@ export function CategoriesSection({ products }: { products: Product[] }) {
       accent: "bg-[#181b21] text-[#f4f1ea]",
       imageClass: "scale-[1.08]",
     },
+    {
+      category: "Shoe Care",
+      eyebrow: "Essentials / 03",
+      title: "Keep them fresh.",
+      description: "Foams, brushes, and cleaning tools made for a sharper rotation.",
+      image: "/images/categories/shoe-care-cutout.png",
+      background: "bg-[#181b21]",
+      text: "text-[#f4f1ea]",
+      accent: "bg-[#c6ff3a] text-[#0f1115]",
+      imageClass: "scale-[1.04]",
+    },
   ];
   return (
     <section className="bg-[#0f1115] py-20 text-[#f4f1ea] sm:py-28">
@@ -37,16 +48,16 @@ export function CategoriesSection({ products }: { products: Product[] }) {
           <div className="max-w-2xl">
             <p className="eyebrow !text-[#c6ff3a]">Browse your way</p>
             <h2 className="mt-3 text-3xl font-semibold tracking-[-0.035em] sm:text-5xl">
-              Two ways to move.
+              Footwear, looked after.
             </h2>
           </div>
           <p className="max-w-md leading-7 text-neutral-400">
-            Shoesoco is focused on two things done well: sneakers for the day
-            and running shoes for the distance.
+            Sneakers for the day, running shoes for the distance, and the
+            essentials that keep every pair looking fresh.
           </p>
         </div>
 
-        <div className="mt-12 grid gap-4 lg:grid-cols-2">
+        <div className="mt-12 grid gap-4 lg:grid-cols-3">
           {collections.map((collection, index) => (
             <Link
               className={`${collection.background} ${collection.text} group relative min-h-[480px] overflow-hidden rounded-[2rem] p-7 sm:min-h-[560px] sm:p-10`}
