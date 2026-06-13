@@ -24,11 +24,32 @@ test("shows the Shoesoco intro and balanced hero categories", async ({ page }) =
 test("filters products and opens quick preview", async ({ page }) => {
   await page.goto("/products");
   await page.getByPlaceholder("Search products, colors, or collections").fill("runner");
-  await expect(page.getByText(/product/).first()).toBeVisible();
+  await expect(page).toHaveURL(/q=runner/);
+  await expect(page.locator("main article")).toHaveCount(1);
   const card = page.locator("article").first();
   await card.hover();
   await card.getByRole("button", { name: "Quick view" }).click();
   await expect(page.getByRole("dialog", { name: "Quick preview" })).toBeVisible();
+  await page.keyboard.press("Escape");
+  await expect(page.getByRole("dialog", { name: "Quick preview" })).toHaveCount(0);
+  await expect(card.getByRole("button", { name: "Quick view" })).toBeFocused();
+});
+
+test("core storefront pages do not overflow horizontally", async ({ page }) => {
+  for (const path of ["/", "/products", "/about", "/contact", "/cart"]) {
+    await page.goto(path);
+    const intro = page.getByTestId("site-intro");
+    if (await intro.isVisible().catch(() => false)) {
+      await page.getByRole("button", { name: "Continue to Shoesoco" }).click();
+    }
+    const dimensions = await page.evaluate(() => ({
+      scrollWidth: document.documentElement.scrollWidth,
+      clientWidth: document.documentElement.clientWidth,
+    }));
+    expect(dimensions.scrollWidth).toBeLessThanOrEqual(
+      dimensions.clientWidth + 1,
+    );
+  }
 });
 
 test("adds a product and opens the mini cart", async ({ page }) => {

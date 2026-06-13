@@ -2,7 +2,10 @@ import { cache } from "react";
 
 import { products as fallbackProducts } from "@/data/products";
 import { siteConfig } from "@/data/site";
-import { isSupabaseConfigured } from "@/lib/supabase/config";
+import {
+  isSupabaseConfigured,
+  useLocalStorefrontFallback,
+} from "@/lib/supabase/config";
 import { createClient } from "@/lib/supabase/server";
 import type { Product, StoreSettings } from "@/types/product";
 
@@ -36,6 +39,13 @@ type ProductRow = {
     position: number;
   }[];
 };
+
+export class StorefrontUnavailableError extends Error {
+  constructor() {
+    super("The storefront data service is unavailable.");
+    this.name = "StorefrontUnavailableError";
+  }
+}
 
 function mapProduct(row: ProductRow): Product {
   return {
@@ -76,7 +86,9 @@ function mapProduct(row: ProductRow): Product {
 }
 
 export const getProducts = cache(async (): Promise<Product[]> => {
-  if (!isSupabaseConfigured) return fallbackProducts;
+  if (!isSupabaseConfigured || useLocalStorefrontFallback) {
+    return fallbackProducts;
+  }
 
   const supabase = await createClient();
   const { data, error } = await supabase
@@ -86,7 +98,7 @@ export const getProducts = cache(async (): Promise<Product[]> => {
     .eq("archived", false)
     .order("created_at", { ascending: false });
 
-  if (error) return fallbackProducts;
+  if (error) throw new StorefrontUnavailableError();
   return (data as ProductRow[]).map(mapProduct);
 });
 
@@ -111,14 +123,14 @@ export async function getFeaturedProducts() {
 }
 
 export const getStoreSettings = cache(async (): Promise<StoreSettings> => {
-  if (!isSupabaseConfigured) return siteConfig;
+  if (!isSupabaseConfigured || useLocalStorefrontFallback) return siteConfig;
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("store_settings")
     .select("*")
     .eq("id", 1)
     .single();
-  if (error || !data) return siteConfig;
+  if (error || !data) throw new StorefrontUnavailableError();
   return {
     whatsappNumber: data.whatsapp_number,
     whatsappDisplayNumber: data.whatsapp_display_number,

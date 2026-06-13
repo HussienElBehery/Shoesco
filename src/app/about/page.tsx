@@ -55,6 +55,7 @@ export default function AboutPage() {
                 alt="Shoesoco sneaker"
                 className="-rotate-6 object-contain drop-shadow-[0_40px_45px_rgba(41,34,25,0.22)]"
                 fill
+                loading="eager"
                 priority
                 sizes="(min-width: 1280px) 1100px, 90vw"
                 src="/images/products/sneaker.png"

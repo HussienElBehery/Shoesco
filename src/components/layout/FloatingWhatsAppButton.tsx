@@ -3,7 +3,8 @@ import { createWhatsAppLink } from "@/lib/whatsapp";
 import { getStoreSettings } from "@/lib/catalog";
 
 export async function FloatingWhatsAppButton() {
-  const settings = await getStoreSettings();
+  const settings = await getStoreSettings().catch(() => null);
+  if (!settings) return null;
   const href = createWhatsAppLink({
     phoneNumber: settings.whatsappNumber,
     message: "Hello Shoesoco, I would like to ask about your shoes.",

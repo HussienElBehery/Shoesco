@@ -66,17 +66,11 @@ async function replaceSizes(
     throw new Error("Duplicate sizes are not allowed.");
   }
 
-  await supabase.from("product_sizes").delete().eq("product_id", productId);
-  if (sizes.length) {
-    const { error } = await supabase.from("product_sizes").insert(
-      sizes.map((row) => ({
-        product_id: productId,
-        size: row.size,
-        available: row.available,
-      })),
-    );
-    if (error) throw error;
-  }
+  const { error } = await supabase.rpc("replace_product_sizes", {
+    p_product_id: productId,
+    p_sizes: sizes,
+  });
+  if (error) throw error;
 }
 
 async function uploadImages(
@@ -95,30 +89,44 @@ async function uploadImages(
     .select("*", { count: "exact", head: true })
     .eq("product_id", productId);
 
-  for (const [index, file] of files.entries()) {
-    if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
-      throw new Error("Images must be JPG, PNG, or WebP.");
-    }
-    if (file.size > 5 * 1024 * 1024) {
-      throw new Error("Each image must be 5MB or smaller.");
-    }
+  const uploadedPaths: string[] = [];
+  try {
+    for (const [index, file] of files.entries()) {
+      if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
+        throw new Error("Images must be JPG, PNG, or WebP.");
+      }
+      if (file.size > 5 * 1024 * 1024) {
+        throw new Error("Each image must be 5MB or smaller.");
+      }
 
-    const extension = file.name.split(".").pop()?.toLowerCase() || "jpg";
-    const path = `${productId}/${crypto.randomUUID()}.${extension}`;
-    const { error: uploadError } = await supabase.storage
-      .from("product-images")
-      .upload(path, file, { contentType: file.type });
-    if (uploadError) throw uploadError;
+      const extension = file.name.split(".").pop()?.toLowerCase() || "jpg";
+      const path = `${productId}/${crypto.randomUUID()}.${extension}`;
+      const { error: uploadError } = await supabase.storage
+        .from("product-images")
+        .upload(path, file, { contentType: file.type });
+      if (uploadError) throw uploadError;
+      uploadedPaths.push(path);
 
-    const { data } = supabase.storage.from("product-images").getPublicUrl(path);
-    const { error: rowError } = await supabase.from("product_images").insert({
-      product_id: productId,
-      storage_path: path,
-      public_url: data.publicUrl,
-      alt_text: productName,
-      position: (count ?? 0) + index,
-    });
-    if (rowError) throw rowError;
+      const { data } = supabase.storage.from("product-images").getPublicUrl(path);
+      const { error: rowError } = await supabase.from("product_images").insert({
+        product_id: productId,
+        storage_path: path,
+        public_url: data.publicUrl,
+        alt_text: productName,
+        position: (count ?? 0) + index,
+      });
+      if (rowError) throw rowError;
+    }
+  } catch (error) {
+    if (uploadedPaths.length) {
+      await supabase.storage.from("product-images").remove(uploadedPaths);
+      await supabase
+        .from("product_images")
+        .delete()
+        .eq("product_id", productId)
+        .in("storage_path", uploadedPaths);
+    }
+    throw error;
   }
 }
 
@@ -153,13 +161,15 @@ export async function saveProduct(formData: FormData) {
       await supabase
         .from("product_images")
         .update({ position: Math.max(0, Number(value) || 0) })
-        .eq("id", key.replace("imagePosition:", ""));
+        .eq("id", key.replace("imagePosition:", ""))
+        .eq("product_id", data.id);
     }
     if (key.startsWith("imageAlt:")) {
       await supabase
         .from("product_images")
         .update({ alt_text: String(value).trim() || values.name })
-        .eq("id", key.replace("imageAlt:", ""));
+        .eq("id", key.replace("imageAlt:", ""))
+        .eq("product_id", data.id);
     }
   }
 
@@ -168,6 +178,7 @@ export async function saveProduct(formData: FormData) {
       .from("product_images")
       .select("storage_path")
       .eq("id", imageId)
+      .eq("product_id", data.id)
       .single();
     if (image) {
       await supabase.storage.from("product-images").remove([image.storage_path]);
@@ -305,7 +316,7 @@ export async function signIn(formData: FormData) {
     email: text(formData, "email"),
     password: text(formData, "password"),
   });
-  if (error) redirect(`/admin/login?error=${encodeURIComponent(error.message)}`);
+  if (error) redirect("/admin/login?error=invalid-credentials");
   redirect("/admin");
 }
 

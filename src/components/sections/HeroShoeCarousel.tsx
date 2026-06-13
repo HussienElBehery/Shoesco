@@ -70,6 +70,7 @@ export function HeroShoeCarousel({ products }: { products: Product[] }) {
           )}
           fill
           key={product.id}
+          loading={index === 0 ? "eager" : "lazy"}
           priority={index === 0}
           sizes="(min-width: 768px) 56vw, 100vw"
           src={product.images[0].url}

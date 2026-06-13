@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 
 import { ProductCatalog } from "@/components/product/ProductCatalog";
 import { Container } from "@/components/ui/Container";
+import { ServiceUnavailable } from "@/components/ui/ServiceUnavailable";
 import { getProducts } from "@/lib/catalog";
 
 export const metadata: Metadata = {
@@ -10,7 +11,12 @@ export const metadata: Metadata = {
 };
 
 export default async function ProductsPage() {
-  const products = await getProducts();
+  let products;
+  try {
+    products = await getProducts();
+  } catch {
+    return <ServiceUnavailable />;
+  }
 
   return (
     <Container className="pb-20 pt-6 sm:pb-28 sm:pt-8">

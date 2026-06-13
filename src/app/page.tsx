@@ -6,9 +6,19 @@ import { ServiceStrip } from "@/components/sections/ServiceStrip";
 import { WhatsAppCtaSection } from "@/components/sections/WhatsAppCtaSection";
 import { WhyChooseSection } from "@/components/sections/WhyChooseSection";
 import { getProducts, getStoreSettings } from "@/lib/catalog";
+import { ServiceUnavailable } from "@/components/ui/ServiceUnavailable";
 
 export default async function HomePage() {
-  const [settings, products] = await Promise.all([getStoreSettings(), getProducts()]);
+  let settings;
+  let products;
+  try {
+    [settings, products] = await Promise.all([
+      getStoreSettings(),
+      getProducts(),
+    ]);
+  } catch {
+    return <ServiceUnavailable />;
+  }
   const featured = products.filter((product) => product.featured);
   return (
     <HomeExperience

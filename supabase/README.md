@@ -10,6 +10,8 @@
 8. Copy the project URL, anon key, and server-only service role key into `.env.local`.
 9. Never expose `SUPABASE_SERVICE_ROLE_KEY` through a `NEXT_PUBLIC_` variable or commit it.
 10. Use the Shoesoco owner dashboard to manage products, orders, and reply settings.
+11. Set a random `RATE_LIMIT_SECRET` in the deployed server environment.
+12. Run `tests/deployment_hardening.sql` on a test database after migrations.
 
 The order endpoint uses the service role only on the server. Browser clients cannot
 call the atomic order-creation function directly, and order rows are readable only
