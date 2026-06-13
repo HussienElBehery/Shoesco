@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { Container } from "@/components/ui/Container";
 import { SocialLinks } from "@/components/ui/SocialLinks";
 import { WhatsAppIcon } from "@/components/ui/WhatsAppIcon";
+import { ServiceUnavailable } from "@/components/ui/ServiceUnavailable";
 import { getStoreSettings } from "@/lib/catalog";
 import { createWhatsAppLink } from "@/lib/whatsapp";
 
@@ -12,7 +13,17 @@ export const metadata: Metadata = {
 };
 
 export default async function ContactPage() {
-  const settings = await getStoreSettings();
+  let settings;
+  try {
+    settings = await getStoreSettings();
+  } catch {
+    return (
+      <ServiceUnavailable
+        message="We cannot load the current contact details safely right now. Please try again shortly."
+        title="Contact details are temporarily unavailable."
+      />
+    );
+  }
   const whatsappLink = createWhatsAppLink({
     phoneNumber: settings.whatsappNumber,
     message: "Hello Shoesoco, I would like help choosing a pair.",

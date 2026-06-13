@@ -22,6 +22,9 @@ export function CartPageClient() {
   const [checkoutToken, setCheckoutToken] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
+  const [serviceStatus, setServiceStatus] = useState<
+    "checking" | "ready" | "unavailable"
+  >("checking");
 
   useEffect(() => {
     const timeout = window.setTimeout(() => {
@@ -56,10 +59,34 @@ export function CartPageClient() {
   }, []);
 
   useEffect(() => {
-    window.localStorage.setItem(
-      "shoesoco-checkout-details-v1",
-      JSON.stringify(details),
-    );
+    const controller = new AbortController();
+    fetch("/api/health", {
+      cache: "no-store",
+      signal: controller.signal,
+    })
+      .then((response) =>
+        setServiceStatus(response.ok ? "ready" : "unavailable"),
+      )
+      .catch((healthError: unknown) => {
+        if (
+          !(healthError instanceof DOMException) ||
+          healthError.name !== "AbortError"
+        ) {
+          setServiceStatus("unavailable");
+        }
+      });
+    return () => controller.abort();
+  }, []);
+
+  useEffect(() => {
+    try {
+      window.localStorage.setItem(
+        "shoesoco-checkout-details-v1",
+        JSON.stringify(details),
+      );
+    } catch {
+      // Checkout remains usable when browser storage is unavailable.
+    }
   }, [details]);
 
   const canOrder = Boolean(
@@ -69,7 +96,8 @@ export function CartPageClient() {
     details.customerEmail.trim() &&
     details.customerPhone.trim() &&
     details.deliveryArea.trim() &&
-    details.deliveryAddress.trim(),
+    details.deliveryAddress.trim() &&
+    serviceStatus === "ready",
   );
 
   async function submitOrder() {
@@ -93,6 +121,7 @@ export function CartPageClient() {
       });
       const result = (await response.json()) as {
         error?: string;
+        code?: string;
         whatsappUrl?: string;
       };
       if (!response.ok || !result.whatsappUrl) {
@@ -223,13 +252,23 @@ export function CartPageClient() {
             {error}
           </p>
         )}
+        {serviceStatus === "unavailable" && !error && (
+          <p className="mt-5 rounded-xl border border-amber-300/30 bg-amber-300/10 p-3 text-sm text-amber-100" role="status">
+            Online ordering is temporarily unavailable. Your cart is saved, so
+            please try again shortly or use the contact page.
+          </p>
+        )}
         <button
           className={`mt-6 flex w-full items-center justify-center rounded-full px-6 py-4 text-sm font-semibold transition ${canOrder ? "bg-[#c6ff3a] text-[#0f1115] hover:bg-[#d4ff6b]" : "pointer-events-none bg-[#181b21]/10 text-[#f4f1ea]/40"}`}
           disabled={!canOrder || submitting}
           onClick={submitOrder}
           type="button"
         >
-          {submitting ? "Saving your order..." : "Save order and continue to WhatsApp"}
+          {submitting
+            ? "Saving your order..."
+            : serviceStatus === "checking"
+              ? "Checking ordering availability..."
+              : "Save order and continue to WhatsApp"}
         </button>
         <p className="mt-4 text-xs leading-5 text-neutral-500">
           Submitting records your request with Shoesoco, then opens WhatsApp so you can send it. Availability, delivery cost, and timing are confirmed in chat. No payment is taken here.

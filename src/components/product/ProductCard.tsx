@@ -8,9 +8,10 @@ import type { Product } from "@/types/product";
 type ProductCardProps = {
   product: Product;
   onQuickView?: (product: Product) => void;
+  priority?: boolean;
 };
 
-export function ProductCard({ product, onQuickView }: ProductCardProps) {
+export function ProductCard({ product, onQuickView, priority = false }: ProductCardProps) {
   const href = `/products/${product.id}`;
   const artworkBackgrounds = [
     "bg-[#181b21]",
@@ -31,6 +32,7 @@ export function ProductCard({ product, onQuickView }: ProductCardProps) {
           <ProductArtwork
             className="transition duration-700 ease-out sm:group-hover:-rotate-3 sm:group-hover:scale-105"
             product={product}
+            priority={priority}
             sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/35 via-transparent to-[#f4f1ea]/5" />

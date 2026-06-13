@@ -24,6 +24,7 @@ export function ProductArtwork({
         alt={image.alt || product.name}
         className={cn("object-contain p-3 sm:p-5", className)}
         fill
+        loading={priority ? "eager" : "lazy"}
         priority={priority}
         sizes={sizes}
         src={image.url}

@@ -1,5 +1,6 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
+import { createTimeoutFetch } from "@/lib/supabase/fetch";
 
 export async function updateSession(request: NextRequest) {
   let response = NextResponse.next({ request });
@@ -8,6 +9,7 @@ export async function updateSession(request: NextRequest) {
   if (!url || !key) return response;
 
   const supabase = createServerClient(url, key, {
+    global: { fetch: createTimeoutFetch(3000) },
     cookies: {
       getAll: () => request.cookies.getAll(),
       setAll: (cookiesToSet) => {
@@ -19,6 +21,10 @@ export async function updateSession(request: NextRequest) {
       },
     },
   });
-  await supabase.auth.getUser();
+  try {
+    await supabase.auth.getUser();
+  } catch {
+    // Let protected pages render their normal unavailable state.
+  }
   return response;
 }

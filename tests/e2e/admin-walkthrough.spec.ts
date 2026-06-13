@@ -89,14 +89,11 @@ test("owner creates a product and a guest can shop it", async ({ browser }) => {
   await guestPage.getByLabel("Delivery area").fill("New Cairo");
   await guestPage.getByLabel("Full delivery address").fill("QA Street, Building 1, Apartment 2");
   await expect(
-    guestPage.getByRole("button", { name: "Save order and continue to WhatsApp" }),
-  ).toBeEnabled();
-  await guestPage
-    .getByRole("button", { name: "Save order and continue to WhatsApp" })
-    .click();
-  await expect(
-    guestPage.getByText("Online ordering is not configured yet.", { exact: true }),
+    guestPage.getByText(/Online ordering is temporarily unavailable/),
   ).toBeVisible();
+  await expect(
+    guestPage.getByRole("button", { name: "Save order and continue to WhatsApp" }),
+  ).toBeDisabled();
   await expect(guestPage.getByText(productName, { exact: true })).toBeVisible();
 
   await ownerPage.bringToFront();

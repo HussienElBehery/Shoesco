@@ -19,6 +19,7 @@ export function Drawer({
 }) {
   const panelRef = useRef<HTMLDivElement>(null);
   const previousFocus = useRef<HTMLElement | null>(null);
+  const titleId = `drawer-${title.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`;
 
   useEffect(() => {
     if (!open) return;
@@ -28,6 +29,7 @@ export function Drawer({
       "button, [href], input, select, textarea, [tabindex]:not([tabindex='-1'])",
     );
     focusable?.focus();
+    const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
 
     function onKeyDown(event: KeyboardEvent) {
@@ -52,7 +54,7 @@ export function Drawer({
 
     document.addEventListener("keydown", onKeyDown);
     return () => {
-      document.body.style.overflow = "";
+      document.body.style.overflow = previousOverflow;
       document.removeEventListener("keydown", onKeyDown);
       previousFocus.current?.focus();
     };
@@ -61,7 +63,7 @@ export function Drawer({
   if (!open) return null;
 
   return (
-    <div aria-label={title} aria-modal="true" className="fixed inset-0 z-[80]" role="dialog">
+    <div aria-labelledby={titleId} aria-modal="true" className="fixed inset-0 z-[80]" role="dialog">
       <button
         aria-label="Close overlay"
         className="absolute inset-0 bg-black/70 backdrop-blur-sm"
@@ -76,7 +78,7 @@ export function Drawer({
         ref={panelRef}
       >
         <div className="sticky top-0 z-10 flex items-center justify-between border-b border-[#2a2e36] bg-[#0f1115]/95 px-5 py-4 backdrop-blur">
-          <h2 className="text-lg font-semibold">{title}</h2>
+          <h2 className="text-lg font-semibold" id={titleId}>{title}</h2>
           <button
             aria-label={`Close ${title}`}
             className="flex h-10 w-10 items-center justify-center rounded-full border border-[#2a2e36] text-xl"

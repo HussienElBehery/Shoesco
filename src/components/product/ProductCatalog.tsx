@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 import { ProductGrid } from "@/components/product/ProductGrid";
@@ -95,11 +95,21 @@ export function ProductCatalog({ products }: { products: Product[] }) {
   );
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [quickView, setQuickView] = useState<Product | null>(null);
+  const hydrated = useSyncExternalStore(
+    () => () => undefined,
+    () => true,
+    () => false,
+  );
 
   useEffect(() => {
     const next = serializeCatalogFilters(filters);
     const query = next.toString();
-    router.replace(query ? `${pathname}?${query}` : pathname, { scroll: false });
+    const currentQuery = window.location.search.replace(/^\?/, "");
+    if (query !== currentQuery) {
+      router.replace(query ? `${pathname}?${query}` : pathname, {
+        scroll: false,
+      });
+    }
     trackEvent("filter_use", {
       category: filters.category,
       gender: filters.gender,
@@ -130,6 +140,7 @@ export function ProductCatalog({ products }: { products: Product[] }) {
             <span className="sr-only">Search products</span>
             <input
               className="h-12 w-full rounded-full border border-[#2a2e36] bg-[#181b21] px-5 text-sm placeholder:text-neutral-500"
+              disabled={!hydrated}
               onChange={(event) => setFilters({ ...filters, query: event.target.value })}
               placeholder="Search products, colors, or collections"
               type="search"

@@ -45,6 +45,19 @@ export function HomeExperience({
     if (introReady) continueButtonRef.current?.focus();
   }, [introReady]);
 
+  useEffect(() => {
+    if (!introVisible || !introReady) return;
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") continueToStore();
+      if (event.key === "Tab") {
+        event.preventDefault();
+        continueButtonRef.current?.focus();
+      }
+    }
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  });
+
   function continueToStore() {
     window.sessionStorage.setItem(INTRO_STORAGE_KEY, "true");
     setLeaving(true);

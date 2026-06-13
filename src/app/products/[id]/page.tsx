@@ -6,6 +6,7 @@ import { ProductGallery } from "@/components/product/ProductGallery";
 import { ProductViewTracker } from "@/components/product/ProductViewTracker";
 import { SizeGuideDialog } from "@/components/product/SizeGuideDialog";
 import { Container } from "@/components/ui/Container";
+import { ServiceUnavailable } from "@/components/ui/ServiceUnavailable";
 import { formatPrice } from "@/lib/format";
 import { getProductById } from "@/lib/products";
 import { getStoreSettings } from "@/lib/catalog";
@@ -15,7 +16,7 @@ type ProductPageProps = { params: Promise<{ id: string }> };
 
 export async function generateMetadata({ params }: ProductPageProps): Promise<Metadata> {
   const { id } = await params;
-  const product = await getProductById(id);
+  const product = await getProductById(id).catch(() => null);
   if (!product) return { title: "Product not found" };
   return {
     title: product.name,
@@ -32,10 +33,16 @@ export async function generateMetadata({ params }: ProductPageProps): Promise<Me
 
 export default async function ProductPage({ params }: ProductPageProps) {
   const { id } = await params;
-  const [product, settings] = await Promise.all([
-    getProductById(id),
-    getStoreSettings(),
-  ]);
+  let product;
+  let settings;
+  try {
+    [product, settings] = await Promise.all([
+      getProductById(id),
+      getStoreSettings(),
+    ]);
+  } catch {
+    return <ServiceUnavailable />;
+  }
   if (!product) notFound();
 
   const available = product.sizes.some((size) => size.available);
@@ -65,7 +72,12 @@ export default async function ProductPage({ params }: ProductPageProps) {
   return (
     <Container className="py-10 sm:py-16 lg:py-20">
       <ProductViewTracker productId={product.id} />
-      <script dangerouslySetInnerHTML={{ __html: JSON.stringify(productJsonLd) }} type="application/ld+json" />
+      <script
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(productJsonLd).replace(/</g, "\\u003c"),
+        }}
+        type="application/ld+json"
+      />
       <div className="grid gap-10 lg:grid-cols-[1.05fr_0.95fr] lg:gap-16">
         <ProductGallery product={product} />
         <div className="flex flex-col justify-center">
@@ -101,7 +113,6 @@ export default async function ProductPage({ params }: ProductPageProps) {
             <a
               className="text-sm font-semibold underline decoration-[#c6ff3a]"
               href={sizeHelpLink}
-              onClick={undefined}
               rel="noreferrer"
               target="_blank"
             >

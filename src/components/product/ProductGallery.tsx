@@ -70,6 +70,7 @@ export function ProductGallery({
           alt={image.alt || product.name}
           className={`object-contain p-5 transition duration-500 ${zoomed ? "scale-150" : "scale-100"}`}
           fill
+          loading="eager"
           priority={!compact}
           sizes={compact ? "(min-width: 1024px) 520px, 100vw" : "(min-width: 1024px) 50vw, 100vw"}
           src={image.url}
