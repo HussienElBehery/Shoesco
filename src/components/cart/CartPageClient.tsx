@@ -9,6 +9,10 @@ import { formatPrice } from "@/lib/format";
 import { trackEvent } from "@/lib/analytics";
 import type { WhatsAppOrderDetails } from "@/types/product";
 
+const CHECKOUT_DETAILS_KEY = "shoesoco-checkout-details-v1";
+const LEGACY_CHECKOUT_DETAILS_KEY = "shoe" + "sco-checkout-details-v1";
+const CHECKOUT_TOKEN_KEY = "shoesoco-checkout-token-v1";
+
 export function CartPageClient() {
   const { items, subtotal, updateQuantity, removeItem, clearCart, replaceVariant } = useCart();
   const [details, setDetails] = useState<WhatsAppOrderDetails>({
@@ -29,15 +33,13 @@ export function CartPageClient() {
   useEffect(() => {
     const timeout = window.setTimeout(() => {
       const storedToken = window.sessionStorage.getItem(
-        "shoesoco-checkout-token-v1",
+        CHECKOUT_TOKEN_KEY,
       );
       const token = storedToken || window.crypto.randomUUID();
       setCheckoutToken(token);
-      window.sessionStorage.setItem("shoesoco-checkout-token-v1", token);
+      window.sessionStorage.setItem(CHECKOUT_TOKEN_KEY, token);
       try {
-        const saved =
-          window.localStorage.getItem("shoesoco-checkout-details-v1") ??
-          window.localStorage.getItem("shoe" + "sco-checkout-details-v1");
+        const saved = window.sessionStorage.getItem(CHECKOUT_DETAILS_KEY);
         if (saved) {
           const parsed = JSON.parse(saved) as Partial<WhatsAppOrderDetails>;
           setDetails({
@@ -48,11 +50,13 @@ export function CartPageClient() {
             deliveryAddress: typeof parsed.deliveryAddress === "string" ? parsed.deliveryAddress : "",
             notes: typeof parsed.notes === "string" ? parsed.notes : "",
           });
-          window.localStorage.removeItem("shoe" + "sco-checkout-details-v1");
         }
+        window.localStorage.removeItem(CHECKOUT_DETAILS_KEY);
+        window.localStorage.removeItem(LEGACY_CHECKOUT_DETAILS_KEY);
       } catch {
-        window.localStorage.removeItem("shoesoco-checkout-details-v1");
-        window.localStorage.removeItem("shoe" + "sco-checkout-details-v1");
+        window.sessionStorage.removeItem(CHECKOUT_DETAILS_KEY);
+        window.localStorage.removeItem(CHECKOUT_DETAILS_KEY);
+        window.localStorage.removeItem(LEGACY_CHECKOUT_DETAILS_KEY);
       }
     }, 0);
     return () => window.clearTimeout(timeout);
@@ -80,8 +84,8 @@ export function CartPageClient() {
 
   useEffect(() => {
     try {
-      window.localStorage.setItem(
-        "shoesoco-checkout-details-v1",
+      window.sessionStorage.setItem(
+        CHECKOUT_DETAILS_KEY,
         JSON.stringify(details),
       );
     } catch {
@@ -132,8 +136,10 @@ export function CartPageClient() {
         subtotal,
       });
       clearCart();
-      window.localStorage.removeItem("shoesoco-checkout-details-v1");
-      window.sessionStorage.removeItem("shoesoco-checkout-token-v1");
+      window.sessionStorage.removeItem(CHECKOUT_DETAILS_KEY);
+      window.localStorage.removeItem(CHECKOUT_DETAILS_KEY);
+      window.localStorage.removeItem(LEGACY_CHECKOUT_DETAILS_KEY);
+      window.sessionStorage.removeItem(CHECKOUT_TOKEN_KEY);
       window.location.assign(result.whatsappUrl);
     } catch (submissionError) {
       setError(
@@ -254,8 +260,8 @@ export function CartPageClient() {
         )}
         {serviceStatus === "unavailable" && !error && (
           <p className="mt-5 rounded-xl border border-amber-300/30 bg-amber-300/10 p-3 text-sm text-amber-100" role="status">
-            Online ordering is temporarily unavailable. Your cart is saved, so
-            please try again shortly or use the contact page.
+            Online ordering is temporarily unavailable. Your cart is saved for
+            this browser session, so please try again shortly or use the contact page.
           </p>
         )}
         <button

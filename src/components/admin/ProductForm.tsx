@@ -1,9 +1,11 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 
 import { saveProduct } from "@/app/admin/actions";
+import { PRODUCT_GENDER_OPTIONS } from "@/lib/product-labels";
 import type { Product } from "@/types/product";
 
 const inputClass =
@@ -56,7 +58,7 @@ export function ProductForm({ product }: { product?: Product }) {
           <label className="text-sm font-semibold">URL slug<input className={inputClass} defaultValue={product?.slug} name="slug" placeholder="urban-runner-white" required /></label>
           <label className="text-sm font-semibold">Price in EGP<input className={inputClass} defaultValue={product?.price} min="1" name="price" required type="number" /></label>
           <label className="text-sm font-semibold">Category<select className={inputClass} defaultValue={product?.category ?? "Sneakers"} name="category"><option>Sneakers</option><option>Running</option><option>Shoe Care</option></select></label>
-          <label className="text-sm font-semibold">Gender<select className={inputClass} defaultValue={product?.gender ?? "Unisex"} name="gender"><option>Men</option><option>Women</option><option>Unisex</option></select></label>
+          <label className="text-sm font-semibold">Gender<select className={inputClass} defaultValue={product?.gender ?? "Unisex"} name="gender">{PRODUCT_GENDER_OPTIONS.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}</select></label>
           <label className="text-sm font-semibold">Colors, separated by commas<input className={inputClass} defaultValue={product?.colors.join(", ")} name="colors" required /></label>
           <label className="text-sm font-semibold">Fit<select aria-label="Fit" className={inputClass} defaultValue={product?.fit ?? "True to size"} name="fit"><option>Narrow</option><option>True to size</option><option>Roomy</option></select></label>
           <label className="text-sm font-semibold">Width<select aria-label="Width" className={inputClass} defaultValue={product?.width ?? "Standard"} name="width"><option>Narrow</option><option>Standard</option><option>Wide</option></select></label>
@@ -94,7 +96,7 @@ export function ProductForm({ product }: { product?: Product }) {
             <div className="mt-5 grid grid-cols-2 gap-4 sm:grid-cols-3">
               {product.images.map((image) => (
                 <div className="relative overflow-hidden rounded-xl border border-[#2a2e36] bg-[#0f1115] p-2" key={image.id}>
-                  <div className="relative aspect-square"><Image alt={image.alt} className="object-contain" fill sizes="180px" src={image.url} /></div>
+                  <div className="relative aspect-square overflow-hidden rounded-lg bg-[#f2efe7]"><Image alt={image.alt} className="object-contain p-2 mix-blend-multiply" fill sizes="180px" src={image.url} /></div>
                   <label className="mt-2 block text-xs">Alt text<input className="mt-1 w-full rounded border border-[#2a2e36] bg-[#181b21] px-2 py-1" defaultValue={image.alt} name={`imageAlt:${image.id}`} /></label>
                   <div className="mt-2 flex items-center justify-between gap-2 text-xs">
                     <label>Position <input className="ml-1 w-12 rounded border border-[#2a2e36] bg-[#181b21] px-1 py-0.5" defaultValue={image.position} min="0" name={`imagePosition:${image.id}`} type="number" /></label>
@@ -109,8 +111,19 @@ export function ProductForm({ product }: { product?: Product }) {
 
       <aside className="h-fit rounded-[1.75rem] border border-[#2a2e36] bg-[#181b21] p-6 text-[#f4f1ea] lg:sticky lg:top-24">
         <h2 className="text-xl font-semibold">Publishing</h2>
+        <p className="mt-2 text-sm leading-6 text-neutral-400">
+          Product title, price, images, sizes, published, and featured status update the customer catalog after saving.
+        </p>
         <label className="mt-6 flex items-center justify-between gap-4"><span><strong className="block text-sm">Published</strong><small className="text-neutral-400">Visible to customers</small></span><input defaultChecked={product?.published ?? true} name="published" type="checkbox" /></label>
         <label className="mt-5 flex items-center justify-between gap-4"><span><strong className="block text-sm">Featured</strong><small className="text-neutral-400">Show on homepage</small></span><input defaultChecked={product?.featured ?? false} name="featured" type="checkbox" /></label>
+        <div className="mt-6 rounded-xl border border-[#2a2e36] bg-[#0f1115] p-3 text-xs leading-5 text-neutral-400">
+          Homepage hero and category mockups are fixed local assets. Removing product images will not remove those mockups.
+        </div>
+        {product && product.published && !product.archived && (
+          <Link className="mt-5 block text-sm font-semibold underline" href={`/products/${product.id}`} target="_blank">
+            View public product page
+          </Link>
+        )}
         {dirty && <p className="mt-6 rounded-xl border border-[#c6ff3a]/30 bg-[#c6ff3a]/10 p-3 text-xs text-[#c6ff3a]">You have unsaved changes.</p>}
         <button className="mt-8 w-full rounded-full bg-[#c6ff3a] px-5 py-3.5 text-sm font-semibold text-[#0f1115]" type="submit">{product ? "Save changes" : "Create product"}</button>
       </aside>

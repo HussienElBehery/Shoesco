@@ -8,6 +8,7 @@ import { ProductGallery } from "@/components/product/ProductGallery";
 import { Drawer } from "@/components/ui/Drawer";
 import { trackEvent } from "@/lib/analytics";
 import { formatPrice } from "@/lib/format";
+import { formatGender } from "@/lib/product-labels";
 import type { Product } from "@/types/product";
 
 export function ProductQuickView({
@@ -27,7 +28,7 @@ export function ProductQuickView({
         <div className="p-5">
           <ProductGallery compact key={product.id} product={product} />
           <p className="mt-7 editorial-label text-[#c6ff3a]">
-            {product.category} / {product.gender}
+            {product.category} / {formatGender(product.gender)}
           </p>
           <div className="mt-2 flex items-start justify-between gap-5">
             <h2 className="text-3xl font-semibold tracking-tight">{product.name}</h2>

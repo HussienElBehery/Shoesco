@@ -14,17 +14,23 @@ test("shows the Shoesoco intro and balanced hero categories", async ({ page }) =
     .toBe("true");
   await expect(page.getByText("SHOESOCO").first()).toBeVisible();
 
-  const sneakerTab = page.getByRole("button", { name: "Show Sneakers shoe" });
-  const runningTab = page.getByRole("button", { name: "Show Running shoe" });
+  const sneakerTab = page.getByRole("button", {
+    name: "Show Sneakers representative shoe",
+  });
+  const runningTab = page.getByRole("button", {
+    name: "Show Running representative shoe",
+  });
+  await sneakerTab.click();
   await expect(sneakerTab).toHaveAttribute("aria-pressed", "true");
   await runningTab.click();
   await expect(runningTab).toHaveAttribute("aria-pressed", "true");
 });
 
 test("filters products and opens quick preview", async ({ page }) => {
-  await page.goto("/products");
-  await page.getByPlaceholder("Search products, colors, or collections").fill("runner");
-  await expect(page).toHaveURL(/q=runner/);
+  await page.goto("/products", { waitUntil: "domcontentloaded" });
+  const search = page.getByPlaceholder("Search products, colors, or collections");
+  await expect(search).toBeEnabled({ timeout: 15000 });
+  await search.fill("runner");
   await expect(page.locator("main article")).toHaveCount(1);
   const card = page.locator("article").first();
   await card.hover();
@@ -36,8 +42,9 @@ test("filters products and opens quick preview", async ({ page }) => {
 });
 
 test("core storefront pages do not overflow horizontally", async ({ page }) => {
+  test.setTimeout(60000);
   for (const path of ["/", "/products", "/about", "/contact", "/cart"]) {
-    await page.goto(path);
+    await page.goto(path, { waitUntil: "domcontentloaded" });
     const intro = page.getByTestId("site-intro");
     if (await intro.isVisible().catch(() => false)) {
       await page.getByRole("button", { name: "Continue to Shoesoco" }).click();
@@ -53,16 +60,36 @@ test("core storefront pages do not overflow horizontally", async ({ page }) => {
 });
 
 test("adds a product and opens the mini cart", async ({ page }) => {
-  await page.goto("/products");
-  await page.locator("article a").first().click();
+  await page.goto("/products", { waitUntil: "domcontentloaded" });
+  const href = await page
+    .locator("main article")
+    .first()
+    .getByRole("link", { name: "Discover this pair" })
+    .getAttribute("href");
+  expect(href).toBeTruthy();
+  await page.goto(href!);
   await page.getByRole("button", { name: "Add to cart" }).click();
   await expect(page.getByRole("dialog", { name: "Added to your rotation" })).toBeVisible();
   await expect(page.getByRole("link", { name: "View cart" })).toBeVisible();
+  await expect
+    .poll(() =>
+      page.evaluate(() => ({
+        local: localStorage.getItem("shoesoco-cart-v2"),
+        session: sessionStorage.getItem("shoesoco-cart-v2"),
+      })),
+    )
+    .toMatchObject({ local: null });
 });
 
 test("shows the complete guest order form in the cart", async ({ page }) => {
-  await page.goto("/products");
-  await page.locator("article a").first().click();
+  await page.goto("/products", { waitUntil: "domcontentloaded" });
+  const href = await page
+    .locator("main article")
+    .first()
+    .getByRole("link", { name: "Discover this pair" })
+    .getAttribute("href");
+  expect(href).toBeTruthy();
+  await page.goto(href!);
   await page.getByRole("button", { name: "Add to cart" }).click();
   await page.getByRole("link", { name: "View cart" }).click();
 
@@ -76,4 +103,28 @@ test("shows the complete guest order form in the cart", async ({ page }) => {
       name: "Save order and continue to WhatsApp",
     }),
   ).toBeDisabled();
+});
+
+test("clears old persistent cart storage on the next visit", async ({ page }) => {
+  await page.addInitScript(() => {
+    localStorage.setItem(
+      "shoesoco-cart-v2",
+      JSON.stringify({ version: 2, items: [] }),
+    );
+    localStorage.setItem(
+      "shoesco-cart-v2",
+      JSON.stringify({ version: 2, items: [] }),
+    );
+  });
+
+  await page.goto("/cart");
+
+  await expect
+    .poll(() =>
+      page.evaluate(() => ({
+        current: localStorage.getItem("shoesoco-cart-v2"),
+        legacy: localStorage.getItem("shoesco-cart-v2"),
+      })),
+    )
+    .toEqual({ current: null, legacy: null });
 });

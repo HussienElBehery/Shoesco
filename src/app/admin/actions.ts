@@ -202,6 +202,8 @@ export async function archiveProduct(formData: FormData) {
     .eq("id", id);
   revalidatePath("/");
   revalidatePath("/products");
+  revalidatePath(`/products/${id}`);
+  revalidatePath("/admin/products");
   redirect("/admin/products");
 }
 
@@ -213,6 +215,48 @@ export async function restoreProduct(formData: FormData) {
     .from("products")
     .update({ archived: false, updated_at: new Date().toISOString() })
     .eq("id", id);
+  revalidatePath("/");
+  revalidatePath("/products");
+  revalidatePath(`/products/${id}`);
+  revalidatePath("/admin/products");
+  redirect("/admin/products");
+}
+
+export async function deleteArchivedProduct(formData: FormData) {
+  const admin = await requireAdmin();
+  if (!admin) redirect("/admin?setup=required");
+  const id = text(formData, "id");
+
+  const { data: product, error: productError } = await admin.supabase
+    .from("products")
+    .select("id, archived, product_images(storage_path)")
+    .eq("id", id)
+    .single();
+  if (productError) throw productError;
+  if (!product.archived) {
+    redirect("/admin/products");
+  }
+
+  const storagePaths = product.product_images
+    .map((image) => image.storage_path)
+    .filter((path) => path && !path.startsWith("/images/"));
+  if (storagePaths.length) {
+    const { error: removeError } = await admin.supabase.storage
+      .from("product-images")
+      .remove(storagePaths);
+    if (removeError) throw removeError;
+  }
+
+  const { error: deleteError } = await admin.supabase
+    .from("products")
+    .delete()
+    .eq("id", id)
+    .eq("archived", true);
+  if (deleteError) throw deleteError;
+
+  revalidatePath("/");
+  revalidatePath("/products");
+  revalidatePath(`/products/${id}`);
   revalidatePath("/admin/products");
   redirect("/admin/products");
 }
@@ -247,7 +291,9 @@ export async function saveSettings(formData: FormData) {
     .eq("id", 1);
   if (error) throw error;
   revalidatePath("/");
+  revalidatePath("/products");
   revalidatePath("/contact");
+  revalidatePath("/admin/settings");
   redirect("/admin/settings?saved=1");
 }
 

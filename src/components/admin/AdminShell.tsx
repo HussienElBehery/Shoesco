@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 
 import { AdminSessionRefresh } from "@/components/admin/AdminSessionRefresh";
+import { StoreConnectionRefresh } from "@/components/admin/StoreConnectionRefresh";
 import { BrandMark } from "@/components/ui/BrandMark";
 import { signOut } from "@/app/admin/actions";
 
@@ -21,9 +22,12 @@ export function AdminShell({ children }: { children: ReactNode }) {
               <Link href="/" target="_blank">View store</Link>
             </nav>
           </div>
-          <form action={signOut}>
-            <button className="rounded-full border px-4 py-2 text-xs font-semibold" type="submit">Sign out</button>
-          </form>
+          <div className="flex items-center gap-2">
+            <StoreConnectionRefresh />
+            <form action={signOut}>
+              <button className="rounded-full border px-4 py-2 text-xs font-semibold" type="submit">Sign out</button>
+            </form>
+          </div>
         </div>
       </header>
       <main className="mx-auto max-w-7xl px-5 py-8 sm:py-12">{children}</main>

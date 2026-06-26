@@ -14,6 +14,7 @@ import {
   serializeCatalogFilters,
   type CatalogFilters,
 } from "@/lib/catalog-filters";
+import { PRODUCT_GENDER_OPTIONS } from "@/lib/product-labels";
 import type { Product } from "@/types/product";
 
 function FilterFields({
@@ -54,9 +55,9 @@ function FilterFields({
         Gender
         <select className={selectClass} onChange={(event) => update("gender", event.target.value as CatalogFilters["gender"])} value={filters.gender}>
           <option value="All">All</option>
-          <option value="Men">Men</option>
-          <option value="Women">Women</option>
-          <option value="Unisex">Unisex</option>
+          {PRODUCT_GENDER_OPTIONS.map((option) => (
+            <option key={option.value} value={option.value}>{option.label}</option>
+          ))}
         </select>
       </label>
       <label className="grid gap-2 text-xs font-semibold text-neutral-400">

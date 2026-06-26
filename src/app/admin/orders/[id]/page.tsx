@@ -14,11 +14,14 @@ import { createWhatsAppLink } from "@/lib/whatsapp";
 
 export default async function AdminOrderPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ saved?: string }>;
 }) {
   await requireAdmin();
   const { id } = await params;
+  const status = await searchParams;
   const [order, settings] = await Promise.all([
     getOrderById(id),
     getStoreSettings(),
@@ -36,7 +39,7 @@ export default async function AdminOrderPage({
   return (
     <AdminShell>
       <Link className="text-sm text-neutral-400 hover:text-[#f4f1ea]" href="/admin/orders">
-        ← Back to orders
+        Back to orders
       </Link>
       <div className="mt-6 flex flex-wrap items-end justify-between gap-5">
         <div>
@@ -71,7 +74,12 @@ export default async function AdminOrderPage({
                   </div>
                   <div>
                     <strong className="text-sm">{item.productName}</strong>
-                    <p className="mt-1 text-xs text-neutral-500">Size {item.size} · {item.color} · Qty {item.quantity}</p>
+                    <p className="mt-1 text-xs text-neutral-500">Size {item.size} / {item.color} / Qty {item.quantity}</p>
+                    {item.productId && (
+                      <Link className="mt-2 inline-block text-xs font-semibold underline" href={`/products/${item.productId}`} target="_blank">
+                        View public product
+                      </Link>
+                    )}
                   </div>
                   <span className="text-sm font-semibold">{formatPrice(item.lineTotal, "EGP")}</span>
                 </article>
@@ -91,6 +99,7 @@ export default async function AdminOrderPage({
                   </time>
                 </div>
               ))}
+              {order.events.length === 0 && <p className="text-sm text-neutral-500">Status changes and order events will appear here.</p>}
             </div>
           </section>
         </div>
@@ -121,9 +130,29 @@ export default async function AdminOrderPage({
             </dl>
           </section>
 
+          <section className="rounded-[1.5rem] border border-[#2a2e36] bg-[#181b21] p-6">
+            <h2 className="text-xl font-semibold">WhatsApp reply</h2>
+            <p className="mt-2 text-sm leading-6 text-neutral-500">
+              This message is generated from Store settings and opens in WhatsApp. Sending still happens manually.
+            </p>
+            <textarea
+              className="mt-4 min-h-36 w-full rounded-xl border border-[#2a2e36] bg-[#0f1115] p-4 text-sm leading-6"
+              defaultValue={reply}
+              readOnly
+            />
+            <a className="mt-4 inline-flex rounded-full bg-[#c6ff3a] px-5 py-3 text-sm font-semibold text-[#0f1115]" href={whatsappUrl} rel="noreferrer" target="_blank">
+              Open WhatsApp reply
+            </a>
+          </section>
+
           <form action={updateOrder} className="rounded-[1.5rem] border border-[#2a2e36] bg-[#181b21] p-6">
             <input name="id" type="hidden" value={order.id} />
             <h2 className="text-xl font-semibold">Manage order</h2>
+            {status.saved && (
+              <p className="mt-4 rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-3 text-sm text-emerald-200">
+                Order updated.
+              </p>
+            )}
             <label className="mt-5 block text-sm font-semibold">
               Status
               <select className="mt-2 h-12 w-full rounded-xl border border-[#2a2e36] bg-[#0f1115] px-4" defaultValue={order.status} name="status">
