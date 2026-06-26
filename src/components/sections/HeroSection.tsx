@@ -3,14 +3,12 @@ import Link from "next/link";
 import { HeroShoeCarousel } from "@/components/sections/HeroShoeCarousel";
 import { ArrowIcon } from "@/components/ui/ArrowIcon";
 import { Container } from "@/components/ui/Container";
-import type { Product, StoreSettings } from "@/types/product";
+import type { StoreSettings } from "@/types/product";
 
 export function HeroSection({
   settings,
-  products,
 }: {
   settings: StoreSettings;
-  products: Product[];
 }) {
   return (
     <section className="overflow-hidden pb-8 pt-5 sm:pb-12 sm:pt-8">
@@ -60,7 +58,7 @@ export function HeroSection({
             </div>
 
             <div className="relative h-[360px] min-w-0 sm:h-[430px] lg:h-[520px]">
-              <HeroShoeCarousel products={products} />
+              <HeroShoeCarousel />
             </div>
           </div>
         </div>

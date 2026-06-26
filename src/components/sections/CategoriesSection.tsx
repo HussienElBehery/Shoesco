@@ -1,46 +1,29 @@
-import Image from "next/image";
 import Link from "next/link";
 
 import { ArrowIcon } from "@/components/ui/ArrowIcon";
 import { Container } from "@/components/ui/Container";
-import type { Product } from "@/types/product";
+import { RepresentativeImage } from "@/components/ui/RepresentativeImage";
+import { homeCategoryCards } from "@/data/home-representatives";
 
-export function CategoriesSection({ products }: { products: Product[] }) {
-  const collections = [
-    {
-      category: "Sneakers",
-      eyebrow: "Everyday / 01",
-      title: "Own the street.",
-      description: "Clean silhouettes made for daily plans and effortless style.",
-      image: products.find((product) => product.category === "Sneakers")?.images[0]?.url,
-      background: "bg-[#181b21]",
-      text: "text-[#f4f1ea]",
-      accent: "bg-neutral-950 text-[#f4f1ea]",
-      imageClass: "scale-[1.14]",
-    },
-    {
-      category: "Running",
-      eyebrow: "Performance / 02",
-      title: "Find your pace.",
-      description: "Responsive comfort built for movement, distance, and momentum.",
-      image: products.find((product) => product.category === "Running")?.images[0]?.url,
-      background: "bg-[#20242b]",
-      text: "text-[#f4f1ea]",
-      accent: "bg-[#181b21] text-[#f4f1ea]",
-      imageClass: "scale-[1.08]",
-    },
-    {
-      category: "Shoe Care",
-      eyebrow: "Essentials / 03",
-      title: "Keep them fresh.",
-      description: "Foams, brushes, and cleaning tools made for a sharper rotation.",
-      image: "/images/categories/shoe-care-cutout.png",
-      background: "bg-[#181b21]",
-      text: "text-[#f4f1ea]",
-      accent: "bg-[#c6ff3a] text-[#0f1115]",
-      imageClass: "scale-[1.04]",
-    },
-  ];
+const cardStyles = [
+  {
+    background: "bg-[#181b21]",
+    text: "text-[#f4f1ea]",
+    accent: "bg-neutral-950 text-[#f4f1ea]",
+  },
+  {
+    background: "bg-[#20242b]",
+    text: "text-[#f4f1ea]",
+    accent: "bg-[#181b21] text-[#f4f1ea]",
+  },
+  {
+    background: "bg-[#181b21]",
+    text: "text-[#f4f1ea]",
+    accent: "bg-[#c6ff3a] text-[#0f1115]",
+  },
+];
+
+export function CategoriesSection() {
   return (
     <section className="bg-[#0f1115] py-20 text-[#f4f1ea] sm:py-28">
       <Container>
@@ -58,10 +41,12 @@ export function CategoriesSection({ products }: { products: Product[] }) {
         </div>
 
         <div className="mt-12 grid gap-4 lg:grid-cols-3">
-          {collections.map((collection, index) => (
+          {homeCategoryCards.map((collection, index) => {
+            const style = cardStyles[index] ?? cardStyles[0];
+            return (
             <Link
-              className={`${collection.background} ${collection.text} group relative min-h-[480px] overflow-hidden rounded-[2rem] p-7 sm:min-h-[560px] sm:p-10`}
-              href={`/products?category=${collection.category}`}
+              className={`${style.background} ${style.text} group relative min-h-[480px] overflow-hidden rounded-[2rem] p-7 sm:min-h-[560px] sm:p-10`}
+              href={collection.href}
               key={collection.category}
             >
               <div className="absolute -right-24 -top-24 h-80 w-80 rounded-full border-[70px] border-[#2a2e36]/10" />
@@ -70,15 +55,13 @@ export function CategoriesSection({ products }: { products: Product[] }) {
               </span>
 
               <div className="absolute inset-x-5 bottom-14 top-[43%] transition duration-700 ease-out group-hover:scale-[1.02] sm:inset-x-8 sm:bottom-16 sm:top-[40%]">
-                {collection.image && (
-                  <Image
-                    alt={`${collection.category} collection`}
-                    className={`object-contain drop-shadow-[0_25px_25px_rgba(0,0,0,0.28)] ${collection.imageClass}`}
-                    fill
-                    sizes="(min-width: 1024px) 50vw, 100vw"
-                    src={collection.image}
-                  />
-                )}
+                <RepresentativeImage
+                  alt={collection.imageAlt}
+                  fallbackLabel={collection.category}
+                  imageClassName={`drop-shadow-[0_25px_25px_rgba(0,0,0,0.28)] ${collection.imageClass}`}
+                  sizes="(min-width: 1024px) 50vw, 100vw"
+                  src={collection.image}
+                />
               </div>
 
               <div className="relative z-10 max-w-sm">
@@ -94,12 +77,12 @@ export function CategoriesSection({ products }: { products: Product[] }) {
               </div>
 
               <div className="absolute bottom-7 right-7 z-10 sm:bottom-10 sm:right-10">
-                <span className={`flex h-12 w-12 items-center justify-center rounded-full transition group-hover:-rotate-12 group-hover:scale-110 ${collection.accent}`}>
+                <span className={`flex h-12 w-12 items-center justify-center rounded-full transition group-hover:-rotate-12 group-hover:scale-110 ${style.accent}`}>
                   <ArrowIcon className="h-5 w-5" />
                 </span>
               </div>
             </Link>
-          ))}
+          )})}
         </div>
       </Container>
     </section>

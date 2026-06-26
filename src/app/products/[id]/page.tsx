@@ -8,6 +8,7 @@ import { SizeGuideDialog } from "@/components/product/SizeGuideDialog";
 import { Container } from "@/components/ui/Container";
 import { ServiceUnavailable } from "@/components/ui/ServiceUnavailable";
 import { formatPrice } from "@/lib/format";
+import { formatGender } from "@/lib/product-labels";
 import { getProductById } from "@/lib/products";
 import { getStoreSettings } from "@/lib/catalog";
 import { createWhatsAppLink } from "@/lib/whatsapp";
@@ -82,7 +83,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
         <ProductGallery product={product} />
         <div className="flex flex-col justify-center">
           <div className="flex flex-wrap items-center gap-2">
-            <p className="editorial-label text-[#c6ff3a]">{product.category} / {product.gender}</p>
+            <p className="editorial-label text-[#c6ff3a]">{product.category} / {formatGender(product.gender)}</p>
             {product.merchandisingLabel && (
               <span className="rounded-full border border-[#c6ff3a]/40 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-[#c6ff3a]">
                 {product.merchandisingLabel}

@@ -26,14 +26,13 @@ export default async function HomePage() {
         <>
           <ServiceStrip />
           <FeaturedProductsSection products={featured} />
-          <CategoriesSection products={products} />
+          <CategoriesSection />
           <WhyChooseSection />
           <WhatsAppCtaSection />
         </>
       }
       hero={
         <HeroSection
-          products={featured.length ? featured : products}
           settings={settings}
         />
       }

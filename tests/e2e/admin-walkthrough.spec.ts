@@ -45,7 +45,7 @@ test("owner creates a product and a guest can shop it", async ({ browser }) => {
   await ownerPage.getByLabel("URL slug").fill(productSlug);
   await ownerPage.getByLabel("Price in EGP").fill("2850");
   await ownerPage.getByLabel("Category").selectOption("Sneakers");
-  await ownerPage.getByLabel("Gender").selectOption("Unisex");
+  await ownerPage.getByLabel("Gender").selectOption({ label: "None" });
   await ownerPage.getByLabel("Colors, separated by commas").fill("Black, White");
   await ownerPage.locator('select[name="fit"]').selectOption("True to size");
   await ownerPage.locator('select[name="width"]').selectOption("Standard");

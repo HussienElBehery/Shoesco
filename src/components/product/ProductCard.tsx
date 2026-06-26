@@ -3,6 +3,7 @@ import Link from "next/link";
 import { ProductArtwork } from "@/components/product/ProductArtwork";
 import { ArrowIcon } from "@/components/ui/ArrowIcon";
 import { formatPrice } from "@/lib/format";
+import { formatGender } from "@/lib/product-labels";
 import type { Product } from "@/types/product";
 
 type ProductCardProps = {
@@ -35,7 +36,7 @@ export function ProductCard({ product, onQuickView, priority = false }: ProductC
             priority={priority}
             sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/35 via-transparent to-[#f4f1ea]/5" />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#0f1115]/10 via-transparent to-white/20" />
           <span
             className={`absolute left-5 top-5 rounded-full px-3 py-1.5 text-[11px] font-semibold ${
               product.sizes.some((size) => size.available)
@@ -67,7 +68,7 @@ export function ProductCard({ product, onQuickView, priority = false }: ProductC
         <div className="flex items-start justify-between gap-4">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#c6ff3a]">
-              {product.category} / {product.gender}
+              {product.category} / {formatGender(product.gender)}
             </p>
             <h2 className="mt-2 text-xl font-semibold tracking-tight">
               <Link href={href}>{product.name}</Link>

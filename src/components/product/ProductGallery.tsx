@@ -48,7 +48,7 @@ export function ProductGallery({
       }}
     >
       <div
-        className={`relative overflow-hidden rounded-[1.75rem] border border-[#2a2e36] bg-[#181b21] ${compact ? "aspect-[4/3]" : "aspect-square"}`}
+        className={`relative overflow-hidden rounded-[1.75rem] border border-[#2a2e36] bg-[#f2efe7] ${compact ? "aspect-[4/3]" : "aspect-square"}`}
         onTouchEnd={(event) => {
           if (touchStart.current === null) return;
           const delta = event.changedTouches[0].clientX - touchStart.current;
@@ -68,7 +68,7 @@ export function ProductGallery({
         />
         <Image
           alt={image.alt || product.name}
-          className={`object-contain p-5 transition duration-500 ${zoomed ? "scale-150" : "scale-100"}`}
+          className={`object-contain p-5 mix-blend-multiply drop-shadow-[0_24px_28px_rgba(15,17,21,0.24)] transition duration-500 ${zoomed ? "scale-150" : "scale-100"}`}
           fill
           loading="eager"
           priority={!compact}
@@ -88,12 +88,12 @@ export function ProductGallery({
             <button
               aria-label={`Show product image ${index + 1}`}
               aria-pressed={index === activeIndex}
-              className={`relative aspect-square overflow-hidden rounded-xl border bg-[#181b21] ${index === activeIndex ? "border-[#c6ff3a]" : "border-[#2a2e36]"}`}
+              className={`relative aspect-square overflow-hidden rounded-xl border bg-[#f2efe7] ${index === activeIndex ? "border-[#c6ff3a]" : "border-[#2a2e36]"}`}
               key={entry.id}
               onClick={() => show(index)}
               type="button"
             >
-              <Image alt="" className="object-contain p-1" fill sizes="96px" src={entry.url} />
+              <Image alt="" className="object-contain p-1 mix-blend-multiply" fill sizes="96px" src={entry.url} />
             </button>
           ))}
         </div>

@@ -11,3 +11,6 @@ yarn-error.log*
 pnpm-debug.log*
 .codex-dev*.log
 test-results/
+
+# Local Netlify folder
+.netlify

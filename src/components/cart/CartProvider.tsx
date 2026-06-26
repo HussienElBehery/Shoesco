@@ -44,15 +44,12 @@ export function CartProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const timeout = window.setTimeout(() => {
       try {
-        const saved =
-          window.localStorage.getItem(CART_STORAGE_KEY) ??
-          window.localStorage.getItem(LEGACY_CART_STORAGE_KEY);
+        const saved = window.sessionStorage.getItem(CART_STORAGE_KEY);
         setItems(parseStoredCart(saved));
-        if (saved) {
-          window.localStorage.removeItem(LEGACY_CART_STORAGE_KEY);
-        }
-      } catch {
         window.localStorage.removeItem(CART_STORAGE_KEY);
+        window.localStorage.removeItem(LEGACY_CART_STORAGE_KEY);
+      } catch {
+        window.sessionStorage.removeItem(CART_STORAGE_KEY);
       } finally {
         hydrated.current = true;
         setIsHydrated(true);
@@ -63,7 +60,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (hydrated.current) {
-      window.localStorage.setItem(CART_STORAGE_KEY, serializeCart(items));
+      window.sessionStorage.setItem(CART_STORAGE_KEY, serializeCart(items));
     }
   }, [items]);
 
