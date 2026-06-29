@@ -113,9 +113,6 @@ production never shows fallback inventory when the database is unavailable.
    SUPABASE_SERVICE_ROLE_KEY=
    RATE_LIMIT_SECRET=
    NEXT_PUBLIC_SITE_URL=http://localhost:3000
-   RESEND_API_KEY=
-   RESEND_FROM_EMAIL=
-   OWNER_NOTIFICATION_EMAIL=Ahmed.rag789@gmail.com
    ```
 
 3. Apply the SQL files in `supabase/migrations` in filename order.

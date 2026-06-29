@@ -11,9 +11,6 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=...
 SUPABASE_SERVICE_ROLE_KEY=...
 RATE_LIMIT_SECRET=at-least-32-random-characters
 NEXT_PUBLIC_SITE_URL=https://your-production-domain.example
-RESEND_API_KEY=...
-RESEND_FROM_EMAIL=orders@your-verified-domain.example
-OWNER_NOTIFICATION_EMAIL=Ahmed.rag789@gmail.com
 ```
 
 `SHOESOCO_OFFLINE_DEV=1` is only for local Playwright/development runs. Do not
@@ -25,10 +22,6 @@ the saved order reference plus the purchased item names:
 ```text
 مساء الخير اوردر رقم {order_reference} حضرتك طالب {item_summary} ببلغ حضرتك ان تأكيد اي اوردر بيكون بتحويل الشحن علي الرقم دا 01154497618
 ```
-
-`RESEND_FROM_EMAIL` must be a verified Resend sender. Order notification
-failures are logged server-side; a saved customer order is not rolled back if an
-external notification provider is temporarily unavailable.
 
 ## Database and owner setup
 
@@ -62,10 +55,10 @@ The audit sends dependency metadata to npm and therefore requires explicit
 approval in restricted environments. Authenticated admin E2E coverage also
 requires `SHOESOCO_TEST_ADMIN_EMAIL` and `SHOESOCO_TEST_ADMIN_PASSWORD`.
 
-After deployment, place one controlled test order and confirm the owner email,
-customer browser confirmation, and admin order page all receive the same order
-reference. A `503` from `/api/health` contains only a non-sensitive error and
-should trigger an alert.
+After deployment, place one controlled test order and confirm the customer
+browser confirmation and admin order page both receive the same order reference.
+A `503` from `/api/health` contains only a non-sensitive error and should
+trigger an alert.
 
 ## Operational behavior
 
@@ -74,9 +67,9 @@ should trigger an alert.
   demo products or uncertain stock.
 - Checkout checks readiness, preserves the cart and customer-entered details,
   and prevents duplicate orders with the checkout token.
-- New orders notify the owner by email through Resend and display the customer
-  confirmation message in the browser. Duplicate checkout-token retries reuse
-  the saved order and do not resend owner notifications.
+- New orders are saved in Supabase for the admin dashboard and display the
+  customer confirmation message in the browser. Duplicate checkout-token
+  retries reuse the saved order.
 - Order rate limits are stored in Supabase using a server-side HMAC of the
   requesting IP. Raw IP addresses are not stored.
 - Server errors use structured JSON logs and must not include request bodies,

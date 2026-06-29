@@ -2,13 +2,8 @@ import { NextResponse } from "next/server";
 import { createHmac } from "node:crypto";
 
 import { apiError, logServerError, readJsonBody } from "@/lib/api";
+import { createCustomerConfirmationMessage } from "@/lib/order-notifications";
 import {
-  createCustomerConfirmationMessage,
-  sendOwnerOrderEmail,
-  shouldSendOrderNotifications,
-} from "@/lib/order-notifications";
-import {
-  createCanonicalOrderMessage,
   validateOrderSubmission,
   type CanonicalOrderItem,
 } from "@/lib/orders";
@@ -90,35 +85,10 @@ export async function POST(request: Request) {
       order_items: CanonicalOrderItem[];
       was_existing: boolean;
     };
-    const origin = new URL(request.url).origin;
-    const message = createCanonicalOrderMessage({
-      reference: result.order_reference,
-      items: result.order_items,
-      subtotal: result.order_subtotal,
-      details,
-      origin,
-    });
     const confirmationMessage = createCustomerConfirmationMessage({
       reference: result.order_reference,
       items: result.order_items,
     });
-
-    if (shouldSendOrderNotifications(result.was_existing)) {
-      const notification = await Promise.allSettled([
-        sendOwnerOrderEmail({
-          reference: result.order_reference,
-          items: result.order_items,
-          subtotal: result.order_subtotal,
-          details,
-          ownerMessage: message,
-        }),
-      ]);
-      if (notification[0]?.status === "rejected") {
-        logServerError("owner_order_email_failed", notification[0].reason, {
-          orderReference: result.order_reference,
-        });
-      }
-    }
 
     return NextResponse.json({
       orderId: result.order_id,

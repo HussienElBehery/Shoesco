@@ -135,7 +135,7 @@ export default async function AdminSettingsPage({
             <textarea className={textareaClass} defaultValue={settings.orderReplyTemplate} maxLength={1000} name="orderReplyTemplate" required />
           </label>
           <p className="mt-3 text-xs leading-5 text-neutral-500">
-            This is a one-click reply in phase one. Automatic sending begins only after the Meta WhatsApp Business webhook is configured.
+            This is a one-click manual reply for owners. Customers see their confirmation message on the site after checkout.
           </p>
         </section>
 
