@@ -116,10 +116,6 @@ production never shows fallback inventory when the database is unavailable.
    RESEND_API_KEY=
    RESEND_FROM_EMAIL=
    OWNER_NOTIFICATION_EMAIL=Ahmed.rag789@gmail.com
-   WHATSAPP_CLOUD_TOKEN=
-   WHATSAPP_PHONE_NUMBER_ID=
-   WHATSAPP_CONFIRMATION_TEMPLATE_NAME=
-   WHATSAPP_CONFIRMATION_TEMPLATE_LANGUAGE=ar_EG
    ```
 
 3. Apply the SQL files in `supabase/migrations` in filename order.

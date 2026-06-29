@@ -3,7 +3,7 @@ import { createHmac } from "node:crypto";
 
 import { apiError, logServerError, readJsonBody } from "@/lib/api";
 import {
-  sendCustomerWhatsAppConfirmation,
+  createCustomerConfirmationMessage,
   sendOwnerOrderEmail,
   shouldSendOrderNotifications,
 } from "@/lib/order-notifications";
@@ -13,7 +13,6 @@ import {
   type CanonicalOrderItem,
 } from "@/lib/orders";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { createWhatsAppLink } from "@/lib/whatsapp";
 
 const MAXIMUM_BODY_BYTES = 16 * 1024;
 
@@ -91,15 +90,6 @@ export async function POST(request: Request) {
       order_items: CanonicalOrderItem[];
       was_existing: boolean;
     };
-    const { data: settings, error: settingsError } = await supabase
-      .from("store_settings")
-      .select("whatsapp_number")
-      .eq("id", 1)
-      .single();
-    if (settingsError || !settings?.whatsapp_number) {
-      throw settingsError ?? new Error("WhatsApp number is not configured.");
-    }
-
     const origin = new URL(request.url).origin;
     const message = createCanonicalOrderMessage({
       reference: result.order_reference,
@@ -108,9 +98,13 @@ export async function POST(request: Request) {
       details,
       origin,
     });
+    const confirmationMessage = createCustomerConfirmationMessage({
+      reference: result.order_reference,
+      items: result.order_items,
+    });
 
     if (shouldSendOrderNotifications(result.was_existing)) {
-      const notifications = await Promise.allSettled([
+      const notification = await Promise.allSettled([
         sendOwnerOrderEmail({
           reference: result.order_reference,
           items: result.order_items,
@@ -118,34 +112,18 @@ export async function POST(request: Request) {
           details,
           ownerMessage: message,
         }),
-        sendCustomerWhatsAppConfirmation({
-          reference: result.order_reference,
-          items: result.order_items,
-          subtotal: result.order_subtotal,
-          details,
-          ownerMessage: message,
-        }),
       ]);
-      notifications.forEach((notification, index) => {
-        if (notification.status === "rejected") {
-          logServerError(
-            index === 0
-              ? "owner_order_email_failed"
-              : "customer_whatsapp_confirmation_failed",
-            notification.reason,
-            { orderReference: result.order_reference },
-          );
-        }
-      });
+      if (notification[0]?.status === "rejected") {
+        logServerError("owner_order_email_failed", notification[0].reason, {
+          orderReference: result.order_reference,
+        });
+      }
     }
 
     return NextResponse.json({
       orderId: result.order_id,
       reference: result.order_reference,
-      whatsappUrl: createWhatsAppLink({
-        phoneNumber: settings.whatsapp_number,
-        message,
-      }),
+      confirmationMessage,
       existing: result.was_existing,
     });
   } catch (error) {

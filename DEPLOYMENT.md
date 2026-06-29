@@ -14,20 +14,16 @@ NEXT_PUBLIC_SITE_URL=https://your-production-domain.example
 RESEND_API_KEY=...
 RESEND_FROM_EMAIL=orders@your-verified-domain.example
 OWNER_NOTIFICATION_EMAIL=Ahmed.rag789@gmail.com
-WHATSAPP_CLOUD_TOKEN=...
-WHATSAPP_PHONE_NUMBER_ID=...
-WHATSAPP_CONFIRMATION_TEMPLATE_NAME=...
-WHATSAPP_CONFIRMATION_TEMPLATE_LANGUAGE=ar_EG
 ```
 
 `SHOESOCO_OFFLINE_DEV=1` is only for local Playwright/development runs. Do not
 set it in production.
 
-The WhatsApp template must be approved in Meta WhatsApp Manager and match the
-customer confirmation copy:
+The customer confirmation is displayed in the browser after checkout and uses
+the saved order reference plus the purchased item names:
 
 ```text
-مساء الخير اوردر رقم {{1}} حضرتك طالب {{2}} ببلغ حضرتك ان تأكيد اي اوردر بيكون بتحويل الشحن علي الرقم دا 01154497618
+مساء الخير اوردر رقم {order_reference} حضرتك طالب {item_summary} ببلغ حضرتك ان تأكيد اي اوردر بيكون بتحويل الشحن علي الرقم دا 01154497618
 ```
 
 `RESEND_FROM_EMAIL` must be a verified Resend sender. Order notification
@@ -67,9 +63,9 @@ approval in restricted environments. Authenticated admin E2E coverage also
 requires `SHOESOCO_TEST_ADMIN_EMAIL` and `SHOESOCO_TEST_ADMIN_PASSWORD`.
 
 After deployment, place one controlled test order and confirm the owner email,
-customer WhatsApp template message, and admin order page all receive the same
-order reference. A `503` from `/api/health` contains only a non-sensitive error
-and should trigger an alert.
+customer browser confirmation, and admin order page all receive the same order
+reference. A `503` from `/api/health` contains only a non-sensitive error and
+should trigger an alert.
 
 ## Operational behavior
 
@@ -78,9 +74,9 @@ and should trigger an alert.
   demo products or uncertain stock.
 - Checkout checks readiness, preserves the cart and customer-entered details,
   and prevents duplicate orders with the checkout token.
-- New orders notify the owner by email through Resend and the customer by
-  WhatsApp template through Meta WhatsApp Cloud API. Duplicate checkout-token
-  retries reuse the saved order and do not resend notifications.
+- New orders notify the owner by email through Resend and display the customer
+  confirmation message in the browser. Duplicate checkout-token retries reuse
+  the saved order and do not resend owner notifications.
 - Order rate limits are stored in Supabase using a server-side HMAC of the
   requesting IP. Raw IP addresses are not stored.
 - Server errors use structured JSON logs and must not include request bodies,

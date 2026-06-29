@@ -27,6 +27,7 @@ export function CartPageClient() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [submittedReference, setSubmittedReference] = useState("");
+  const [confirmationMessage, setConfirmationMessage] = useState("");
   const [serviceStatus, setServiceStatus] = useState<
     "checking" | "ready" | "unavailable"
   >("checking");
@@ -128,12 +129,12 @@ export function CartPageClient() {
         error?: string;
         code?: string;
         reference?: string;
-        whatsappUrl?: string;
+        confirmationMessage?: string;
       };
-      if (!response.ok || !result.reference) {
+      if (!response.ok || !result.reference || !result.confirmationMessage) {
         throw new Error(result.error || "We could not save your order.");
       }
-      trackEvent("whatsapp_checkout_click", {
+      trackEvent("order_submit", {
         itemCount: items.length,
         subtotal,
       });
@@ -143,6 +144,7 @@ export function CartPageClient() {
       window.localStorage.removeItem(LEGACY_CHECKOUT_DETAILS_KEY);
       window.sessionStorage.removeItem(CHECKOUT_TOKEN_KEY);
       setSubmittedReference(result.reference);
+      setConfirmationMessage(result.confirmationMessage);
       setSubmitting(false);
     } catch (submissionError) {
       setError(
@@ -160,7 +162,13 @@ export function CartPageClient() {
         <p className="eyebrow !text-[#c6ff3a]">Order submitted</p>
         <h1 className="mt-4 text-3xl font-semibold">We received your request.</h1>
         <p className="mx-auto mt-3 max-w-xl text-neutral-400">
-          Your order reference is {submittedReference}. Shoesoco has received your details, and a WhatsApp confirmation message will be sent to your phone.
+          Your order reference is {submittedReference}. Shoesoco has received your details, and the confirmation message is below.
+        </p>
+        <p
+          className="mx-auto mt-6 max-w-2xl rounded-2xl border border-[#2a2e36] bg-[#0f1115] p-5 text-right text-lg leading-9 text-[#f4f1ea]"
+          dir="rtl"
+        >
+          {confirmationMessage}
         </p>
         <Link className="mt-7 inline-flex rounded-full bg-[#c6ff3a] px-6 py-3 text-sm font-semibold text-[#0f1115]" href="/products">
           Continue shopping
@@ -295,7 +303,7 @@ export function CartPageClient() {
               : "Submit order request"}
         </button>
         <p className="mt-4 text-xs leading-5 text-neutral-500">
-          Submitting records your request with Shoesoco, sends your order details to the owner, and sends you a WhatsApp confirmation message. No payment is taken here.
+          Submitting records your request with Shoesoco, sends your order details to the owner, and shows your confirmation message here. No payment is taken here.
         </p>
       </aside>
     </div>

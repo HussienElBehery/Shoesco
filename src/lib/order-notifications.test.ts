@@ -2,10 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 
 import {
   createCustomerConfirmationMessage,
-  createOrderItemSummary,
   createOwnerEmailPayload,
-  createWhatsAppTemplatePayload,
-  normalizeWhatsAppRecipient,
   shouldSendOrderNotifications,
 } from "./order-notifications";
 import type { CanonicalOrderItem } from "./orders";
@@ -69,33 +66,8 @@ describe("order notification payloads", () => {
     vi.unstubAllEnvs();
   });
 
-  it("builds a WhatsApp template payload with order variables", () => {
-    vi.stubEnv("WHATSAPP_CONFIRMATION_TEMPLATE_NAME", "order_confirmation");
-    vi.stubEnv("WHATSAPP_CONFIRMATION_TEMPLATE_LANGUAGE", "ar_EG");
-
-    const payload = createWhatsAppTemplatePayload({
-      reference: "SCO-260629-ABC123",
-      items,
-      details,
-    });
-
-    expect(payload.to).toBe("201154497618");
-    expect(payload.template.name).toBe("order_confirmation");
-    expect(payload.template.components[0].parameters).toEqual([
-      { type: "text", text: "SCO-260629-ABC123" },
-      { type: "text", text: createOrderItemSummary(items) },
-    ]);
-
-    vi.unstubAllEnvs();
-  });
-
   it("does not send notifications for duplicate checkout tokens", () => {
     expect(shouldSendOrderNotifications(false)).toBe(true);
     expect(shouldSendOrderNotifications(true)).toBe(false);
-  });
-
-  it("normalizes Egyptian local phone numbers for WhatsApp", () => {
-    expect(normalizeWhatsAppRecipient("011 5449 7618")).toBe("201154497618");
-    expect(normalizeWhatsAppRecipient("+20 115 449 7618")).toBe("201154497618");
   });
 });
