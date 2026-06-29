@@ -14,7 +14,7 @@ const events = new Set<AnalyticsEvent>([
   "gallery_interaction",
   "add_to_cart",
   "size_help_click",
-  "whatsapp_checkout_click",
+  "order_submit",
 ]);
 
 export async function POST(request: Request) {

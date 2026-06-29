@@ -98,7 +98,7 @@ export default async function AdminPage() {
             <p className="eyebrow">Store health</p>
             <h2 className="mt-2 text-2xl font-semibold">Supabase connection</h2>
             <p className="mt-3 text-sm leading-6 text-neutral-500">
-              Use this before daily checks or whenever customers see an unavailable message.
+              Checks the live store API and Supabase connection. Vercel deployments still run from GitHub pushes.
             </p>
             <div className="mt-5">
               <StoreConnectionRefresh />

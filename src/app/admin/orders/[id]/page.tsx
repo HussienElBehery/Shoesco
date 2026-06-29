@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { updateOrder } from "@/app/admin/actions";
+import { DeleteOrderForm } from "@/components/admin/DeleteOrderForm";
 import { AdminShell } from "@/components/admin/AdminShell";
 import { OrderStatusBadge } from "@/components/admin/OrderStatusBadge";
 import { requireAdmin } from "@/lib/admin";
@@ -165,6 +166,16 @@ export default async function AdminOrderPage({
             </label>
             <button className="mt-5 w-full rounded-full bg-[#f4f1ea] px-5 py-3 text-sm font-semibold text-[#0f1115]" type="submit">Save changes</button>
           </form>
+
+          <section className="rounded-[1.5rem] border border-red-400/40 bg-[#181b21] p-6">
+            <h2 className="text-xl font-semibold text-red-200">Remove order</h2>
+            <p className="mt-2 text-sm leading-6 text-neutral-500">
+              Use this for test or duplicate requests only. Deleted orders cannot be restored.
+            </p>
+            <div className="mt-5">
+              <DeleteOrderForm orderId={order.id} reference={order.reference} />
+            </div>
+          </section>
         </div>
       </div>
     </AdminShell>

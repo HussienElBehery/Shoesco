@@ -2,13 +2,12 @@ import { NextResponse } from "next/server";
 import { createHmac } from "node:crypto";
 
 import { apiError, logServerError, readJsonBody } from "@/lib/api";
+import { createCustomerConfirmationMessage } from "@/lib/order-notifications";
 import {
-  createCanonicalOrderMessage,
   validateOrderSubmission,
   type CanonicalOrderItem,
 } from "@/lib/orders";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { createWhatsAppLink } from "@/lib/whatsapp";
 
 const MAXIMUM_BODY_BYTES = 16 * 1024;
 
@@ -86,31 +85,15 @@ export async function POST(request: Request) {
       order_items: CanonicalOrderItem[];
       was_existing: boolean;
     };
-    const { data: settings, error: settingsError } = await supabase
-      .from("store_settings")
-      .select("whatsapp_number")
-      .eq("id", 1)
-      .single();
-    if (settingsError || !settings?.whatsapp_number) {
-      throw settingsError ?? new Error("WhatsApp number is not configured.");
-    }
-
-    const origin = new URL(request.url).origin;
-    const message = createCanonicalOrderMessage({
+    const confirmationMessage = createCustomerConfirmationMessage({
       reference: result.order_reference,
       items: result.order_items,
-      subtotal: result.order_subtotal,
-      details,
-      origin,
     });
 
     return NextResponse.json({
       orderId: result.order_id,
       reference: result.order_reference,
-      whatsappUrl: createWhatsAppLink({
-        phoneNumber: settings.whatsapp_number,
-        message,
-      }),
+      confirmationMessage,
       existing: result.was_existing,
     });
   } catch (error) {

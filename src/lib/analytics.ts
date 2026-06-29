@@ -6,7 +6,7 @@ export type AnalyticsEvent =
   | "gallery_interaction"
   | "add_to_cart"
   | "size_help_click"
-  | "whatsapp_checkout_click";
+  | "order_submit";
 
 type AnalyticsPayload = Record<string, string | number | boolean | undefined>;
 

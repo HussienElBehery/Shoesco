@@ -15,7 +15,7 @@ export const siteConfig: StoreSettings & {
     instagram: "https://www.instagram.com/shoesoco",
     tiktok: "https://www.tiktok.com/@shoesoco",
   },
-  email: "hello@shoesoco.com",
+  email: "Ahmed.rag789@gmail.com",
   location: "Cairo, Egypt",
   supportHours: "Saturday-Thursday, 10am-8pm",
   heroEyebrow: "Sneakers / Running / Shoe Care",

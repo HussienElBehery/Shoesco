@@ -62,7 +62,7 @@ automated desktop and mobile testing.
 | File storage | Supabase Storage |
 | Unit testing | Vitest |
 | Browser testing | Playwright |
-| Hosting | Netlify |
+| Hosting | Vercel |
 
 ## Architecture
 
@@ -154,9 +154,9 @@ workflows when test credentials are configured.
 
 ## Deployment
 
-The live application is deployed on Netlify from the
-`codex/shoesoco-editorial-storefront` branch. Pushes to that branch trigger a
-new production build automatically.
+The live application is deployed on Vercel from the connected GitHub
+repository. Pushes to the production branch trigger a new production build
+automatically.
 
 See [DEPLOYMENT.md](./DEPLOYMENT.md) for environment variables, migration order,
 admin setup, release verification, health checks, and rollback guidance.

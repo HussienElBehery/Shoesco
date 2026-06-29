@@ -16,6 +16,13 @@ NEXT_PUBLIC_SITE_URL=https://your-production-domain.example
 `SHOESOCO_OFFLINE_DEV=1` is only for local Playwright/development runs. Do not
 set it in production.
 
+The customer confirmation is displayed in the browser after checkout and uses
+the saved order reference plus the purchased item names:
+
+```text
+مساء الخير اوردر رقم {order_reference} حضرتك طالب {item_summary} ببلغ حضرتك ان تأكيد اي اوردر بيكون بتحويل الشحن علي الرقم دا 01154497618
+```
+
 ## Database and owner setup
 
 1. Apply every file in `supabase/migrations` in filename order.
@@ -24,6 +31,15 @@ set it in production.
 4. Insert the owner's auth UUID into `public.admin_users`.
 5. Run `supabase/tests/deployment_hardening.sql` against a non-production test
    database after migrations.
+
+## Vercel deployment
+
+1. Import `https://github.com/HussienElBehery/Shoesco` into Vercel.
+2. Set the required configuration above for Production, Preview, and
+   Development as appropriate.
+3. Push to the connected production branch to trigger a build.
+4. After deployment, request `GET /api/health` and confirm it returns
+   `{"status":"ready"}`.
 
 ## Release checks
 
@@ -39,9 +55,10 @@ The audit sends dependency metadata to npm and therefore requires explicit
 approval in restricted environments. Authenticated admin E2E coverage also
 requires `SHOESOCO_TEST_ADMIN_EMAIL` and `SHOESOCO_TEST_ADMIN_PASSWORD`.
 
-After deployment, request `GET /api/health`. A `200` response with
-`{"status":"ready"}` means the app can reach required Supabase data. A `503`
-contains only a non-sensitive error and should trigger an alert.
+After deployment, place one controlled test order and confirm the customer
+browser confirmation and admin order page both receive the same order reference.
+A `503` from `/api/health` contains only a non-sensitive error and should
+trigger an alert.
 
 ## Operational behavior
 
@@ -50,6 +67,9 @@ contains only a non-sensitive error and should trigger an alert.
   demo products or uncertain stock.
 - Checkout checks readiness, preserves the cart and customer-entered details,
   and prevents duplicate orders with the checkout token.
+- New orders are saved in Supabase for the admin dashboard and display the
+  customer confirmation message in the browser. Duplicate checkout-token
+  retries reuse the saved order.
 - Order rate limits are stored in Supabase using a server-side HMAC of the
   requesting IP. Raw IP addresses are not stored.
 - Server errors use structured JSON logs and must not include request bodies,
