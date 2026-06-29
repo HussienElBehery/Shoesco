@@ -6,7 +6,7 @@ type RefreshState = "idle" | "checking" | "ready" | "issue";
 
 export function StoreConnectionRefresh() {
   const [state, setState] = useState<RefreshState>("idle");
-  const [message, setMessage] = useState("Refresh store");
+  const [message, setMessage] = useState("Check store health");
 
   async function refreshStore() {
     setState("checking");

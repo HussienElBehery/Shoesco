@@ -100,7 +100,7 @@ test("shows the complete guest order form in the cart", async ({ page }) => {
   await expect(page.getByLabel("Full delivery address")).toBeVisible();
   await expect(
     page.getByRole("button", {
-      name: "Save order and continue to WhatsApp",
+      name: "Submit order request",
     }),
   ).toBeDisabled();
 });

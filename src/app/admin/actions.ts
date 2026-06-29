@@ -341,6 +341,19 @@ export async function updateOrder(formData: FormData) {
   redirect(`/admin/orders/${id}?saved=1`);
 }
 
+export async function deleteOrder(formData: FormData) {
+  const admin = await requireAdmin();
+  if (!admin) redirect("/admin?setup=required");
+  const id = text(formData, "id");
+  const { error } = await admin.supabase.from("orders").delete().eq("id", id);
+  if (error) throw error;
+
+  revalidatePath("/admin");
+  revalidatePath("/admin/orders");
+  revalidatePath(`/admin/orders/${id}`);
+  redirect("/admin/orders?deleted=1");
+}
+
 export async function changeOwnerPassword(formData: FormData) {
   const admin = await requireAdmin();
   if (!admin) redirect("/admin?setup=required");

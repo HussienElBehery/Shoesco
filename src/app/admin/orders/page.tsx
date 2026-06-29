@@ -3,8 +3,13 @@ import { AdminShell } from "@/components/admin/AdminShell";
 import { requireAdmin } from "@/lib/admin";
 import { getOrders } from "@/lib/order-data";
 
-export default async function AdminOrdersPage() {
+export default async function AdminOrdersPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ deleted?: string }>;
+}) {
   await requireAdmin();
+  const status = await searchParams;
   const orders = await getOrders();
   return (
     <AdminShell>
@@ -20,6 +25,11 @@ export default async function AdminOrdersPage() {
           {orders.length} total
         </span>
       </div>
+      {status.deleted && (
+        <p className="mt-6 rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-4 text-sm text-emerald-200">
+          Order deleted.
+        </p>
+      )}
       <AdminOrderList orders={orders} />
     </AdminShell>
   );

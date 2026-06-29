@@ -62,7 +62,7 @@ automated desktop and mobile testing.
 | File storage | Supabase Storage |
 | Unit testing | Vitest |
 | Browser testing | Playwright |
-| Hosting | Netlify |
+| Hosting | Vercel |
 
 ## Architecture
 
@@ -113,6 +113,13 @@ production never shows fallback inventory when the database is unavailable.
    SUPABASE_SERVICE_ROLE_KEY=
    RATE_LIMIT_SECRET=
    NEXT_PUBLIC_SITE_URL=http://localhost:3000
+   RESEND_API_KEY=
+   RESEND_FROM_EMAIL=
+   OWNER_NOTIFICATION_EMAIL=Ahmed.rag789@gmail.com
+   WHATSAPP_CLOUD_TOKEN=
+   WHATSAPP_PHONE_NUMBER_ID=
+   WHATSAPP_CONFIRMATION_TEMPLATE_NAME=
+   WHATSAPP_CONFIRMATION_TEMPLATE_LANGUAGE=ar_EG
    ```
 
 3. Apply the SQL files in `supabase/migrations` in filename order.
@@ -154,9 +161,9 @@ workflows when test credentials are configured.
 
 ## Deployment
 
-The live application is deployed on Netlify from the
-`codex/shoesoco-editorial-storefront` branch. Pushes to that branch trigger a
-new production build automatically.
+The live application is deployed on Vercel from the connected GitHub
+repository. Pushes to the production branch trigger a new production build
+automatically.
 
 See [DEPLOYMENT.md](./DEPLOYMENT.md) for environment variables, migration order,
 admin setup, release verification, health checks, and rollback guidance.

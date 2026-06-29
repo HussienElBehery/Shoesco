@@ -3,6 +3,11 @@ import { createHmac } from "node:crypto";
 
 import { apiError, logServerError, readJsonBody } from "@/lib/api";
 import {
+  sendCustomerWhatsAppConfirmation,
+  sendOwnerOrderEmail,
+  shouldSendOrderNotifications,
+} from "@/lib/order-notifications";
+import {
   createCanonicalOrderMessage,
   validateOrderSubmission,
   type CanonicalOrderItem,
@@ -103,6 +108,36 @@ export async function POST(request: Request) {
       details,
       origin,
     });
+
+    if (shouldSendOrderNotifications(result.was_existing)) {
+      const notifications = await Promise.allSettled([
+        sendOwnerOrderEmail({
+          reference: result.order_reference,
+          items: result.order_items,
+          subtotal: result.order_subtotal,
+          details,
+          ownerMessage: message,
+        }),
+        sendCustomerWhatsAppConfirmation({
+          reference: result.order_reference,
+          items: result.order_items,
+          subtotal: result.order_subtotal,
+          details,
+          ownerMessage: message,
+        }),
+      ]);
+      notifications.forEach((notification, index) => {
+        if (notification.status === "rejected") {
+          logServerError(
+            index === 0
+              ? "owner_order_email_failed"
+              : "customer_whatsapp_confirmation_failed",
+            notification.reason,
+            { orderReference: result.order_reference },
+          );
+        }
+      });
+    }
 
     return NextResponse.json({
       orderId: result.order_id,
