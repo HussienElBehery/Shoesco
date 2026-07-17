@@ -7,7 +7,7 @@ import {
   useLocalStorefrontFallback,
 } from "@/lib/supabase/config";
 import { createClient } from "@/lib/supabase/server";
-import type { Product, StoreSettings } from "@/types/product";
+import type { Product, ReviewImage, StoreSettings } from "@/types/product";
 
 type ProductRow = {
   id: string;
@@ -122,6 +122,52 @@ export async function getFeaturedProducts() {
   return (await getProducts()).filter((product) => product.featured);
 }
 
+type ReviewImageRow = {
+  id: string;
+  storage_path: string;
+  public_url: string;
+  alt_text: string;
+  position: number;
+  created_at: string;
+  updated_at: string;
+};
+
+function mapReviewImage(row: ReviewImageRow): ReviewImage {
+  return {
+    id: row.id,
+    path: row.storage_path,
+    url: row.public_url,
+    alt: row.alt_text,
+    position: row.position,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+  };
+}
+
+export const getReviewImages = cache(async (): Promise<ReviewImage[]> => {
+  if (!isSupabaseConfigured || useLocalStorefrontFallback) return [];
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("review_images")
+    .select("*")
+    .order("position")
+    .order("created_at");
+  if (error) throw new StorefrontUnavailableError();
+  return (data as ReviewImageRow[]).map(mapReviewImage);
+});
+
+export const getReviewImagesForAdmin = cache(async (): Promise<ReviewImage[]> => {
+  if (!isSupabaseConfigured) return [];
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("review_images")
+    .select("*")
+    .order("position")
+    .order("created_at");
+  if (error) throw error;
+  return (data as ReviewImageRow[]).map(mapReviewImage);
+});
+
 export const getStoreSettings = cache(async (): Promise<StoreSettings> => {
   if (!isSupabaseConfigured || useLocalStorefrontFallback) return siteConfig;
   const supabase = await createClient();
@@ -142,6 +188,7 @@ export const getStoreSettings = cache(async (): Promise<StoreSettings> => {
     heroEyebrow: data.hero_eyebrow,
     heroTitle: data.hero_title,
     heroDescription: data.hero_description,
+    heroFeaturedProductId: data.hero_featured_product_id ?? null,
     deliveryNote: data.delivery_note ?? siteConfig.deliveryNote,
     returnsNote: data.returns_note ?? siteConfig.returnsNote,
     sizeGuideNote: data.size_guide_note ?? siteConfig.sizeGuideNote,
@@ -149,5 +196,9 @@ export const getStoreSettings = cache(async (): Promise<StoreSettings> => {
       data.order_reply_enabled ?? siteConfig.orderReplyEnabled,
     orderReplyTemplate:
       data.order_reply_template ?? siteConfig.orderReplyTemplate,
+    siteConfirmationTemplate:
+      data.site_confirmation_template ?? siteConfig.siteConfirmationTemplate,
+    whatsappConfirmationTemplate:
+      data.whatsapp_confirmation_template ?? siteConfig.whatsappConfirmationTemplate,
   };
 });

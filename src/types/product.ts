@@ -54,11 +54,24 @@ export type StoreSettings = {
   heroEyebrow: string;
   heroTitle: string;
   heroDescription: string;
+  heroFeaturedProductId: string | null;
   deliveryNote: string;
   returnsNote: string;
   sizeGuideNote: string;
   orderReplyEnabled: boolean;
   orderReplyTemplate: string;
+  siteConfirmationTemplate: string;
+  whatsappConfirmationTemplate: string;
+};
+
+export type ReviewImage = {
+  id: string;
+  path: string;
+  url: string;
+  alt: string;
+  position: number;
+  createdAt: string;
+  updatedAt: string;
 };
 
 export type CartItem = {
@@ -82,6 +95,24 @@ export type WhatsAppOrderDetails = {
   deliveryArea: string;
   deliveryAddress: string;
   notes?: string;
+};
+
+export type EmailDelivery =
+  | "sent"
+  | "not_requested"
+  | "failed"
+  | "already_processed";
+
+export type OrderReceiptItem = {
+  productId: string;
+  slug: string;
+  name: string;
+  image: string;
+  size: string;
+  color: string;
+  quantity: number;
+  unitPrice: number;
+  lineTotal: number;
 };
 
 export type OrderStatus =

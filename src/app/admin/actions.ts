@@ -5,6 +5,15 @@ import { redirect } from "next/navigation";
 
 import { requireAdmin } from "@/lib/admin";
 import { ORDER_STATUSES } from "@/lib/orders";
+import {
+  isGmailEnvironmentConfigured,
+  validateConfirmationTemplate,
+  verifyGmailAppPassword,
+} from "@/lib/order-notifications";
+import {
+  validateReviewCollectionSize,
+  validateReviewImage,
+} from "@/lib/review-images";
 import { createClient } from "@/lib/supabase/server";
 import type { OrderStatus } from "@/types/product";
 
@@ -264,10 +273,33 @@ export async function deleteArchivedProduct(formData: FormData) {
 export async function saveSettings(formData: FormData) {
   const admin = await requireAdmin();
   if (!admin) redirect("/admin?setup=required");
+  const heroFeaturedProductId = text(formData, "heroFeaturedProductId");
+  if (heroFeaturedProductId) {
+    const { data: heroProduct, error: heroProductError } = await admin.supabase
+      .from("products")
+      .select("id")
+      .eq("id", heroFeaturedProductId)
+      .eq("published", true)
+      .eq("archived", false)
+      .maybeSingle();
+    if (heroProductError || !heroProduct) {
+      throw new Error("Choose a published, active product for the homepage feature.");
+    }
+  }
   const replyTemplate = text(formData, "orderReplyTemplate");
   if (!replyTemplate || replyTemplate.length > 1000) {
     throw new Error("The WhatsApp reply template must be between 1 and 1000 characters.");
   }
+  const siteTemplate = validateConfirmationTemplate(
+    text(formData, "siteConfirmationTemplate"),
+    ["{order_reference}", "{item_summary}"],
+  );
+  const whatsappTemplate = validateConfirmationTemplate(
+    text(formData, "whatsappConfirmationTemplate"),
+    ["{order_reference}", "{item_list}"],
+  );
+  if (!siteTemplate.ok) throw new Error(siteTemplate.error);
+  if (!whatsappTemplate.ok) throw new Error(whatsappTemplate.error);
   const { error } = await admin.supabase
     .from("store_settings")
     .update({
@@ -281,20 +313,193 @@ export async function saveSettings(formData: FormData) {
       hero_eyebrow: text(formData, "heroEyebrow"),
       hero_title: text(formData, "heroTitle"),
       hero_description: text(formData, "heroDescription"),
+      hero_featured_product_id: heroFeaturedProductId || null,
       delivery_note: text(formData, "deliveryNote"),
       returns_note: text(formData, "returnsNote"),
       size_guide_note: text(formData, "sizeGuideNote"),
       order_reply_enabled: formData.get("orderReplyEnabled") === "on",
       order_reply_template: replyTemplate,
+      site_confirmation_template: siteTemplate.value,
+      whatsapp_confirmation_template: whatsappTemplate.value,
       updated_at: new Date().toISOString(),
     })
     .eq("id", 1);
   if (error) throw error;
-  revalidatePath("/");
-  revalidatePath("/products");
-  revalidatePath("/contact");
+  revalidatePath("/", "layout");
   revalidatePath("/admin/settings");
   redirect("/admin/settings?saved=1");
+}
+
+export async function saveGmailConnection(formData: FormData) {
+  const admin = await requireAdmin();
+  if (!admin) redirect("/admin?setup=required");
+  if (isGmailEnvironmentConfigured()) {
+    redirect("/admin/settings?gmailError=environment");
+  }
+
+  let appPassword = "";
+  try {
+    appPassword = await verifyGmailAppPassword(
+      text(formData, "gmailAppPassword"),
+    );
+  } catch {
+    redirect("/admin/settings?gmailError=invalid");
+  }
+
+  const { error } = await admin.supabase.rpc("set_gmail_app_password", {
+    p_password: appPassword,
+  });
+  if (error) redirect("/admin/settings?gmailError=save");
+  revalidatePath("/admin/settings");
+  redirect("/admin/settings?gmail=saved");
+}
+
+export async function removeGmailConnection() {
+  const admin = await requireAdmin();
+  if (!admin) redirect("/admin?setup=required");
+  if (isGmailEnvironmentConfigured()) {
+    redirect("/admin/settings?gmailError=environment");
+  }
+
+  const { error } = await admin.supabase.rpc("remove_gmail_app_password");
+  if (error) redirect("/admin/settings?gmailError=remove");
+  revalidatePath("/admin/settings");
+  redirect("/admin/settings?gmail=removed");
+}
+
+export async function uploadReviewImages(formData: FormData) {
+  const admin = await requireAdmin();
+  if (!admin) redirect("/admin?setup=required");
+  const files = formData
+    .getAll("reviewImages")
+    .filter((entry): entry is File => entry instanceof File && entry.size > 0);
+  const { count, error: countError } = await admin.supabase
+    .from("review_images")
+    .select("*", { count: "exact", head: true });
+  if (countError) throw countError;
+  validateReviewCollectionSize(count ?? 0, files.length);
+
+  const { data: lastReview, error: positionError } = await admin.supabase
+    .from("review_images")
+    .select("position")
+    .order("position", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  if (positionError) throw positionError;
+
+  const uploadedPaths: string[] = [];
+  const rows: {
+    storage_path: string;
+    public_url: string;
+    alt_text: string;
+    position: number;
+  }[] = [];
+  try {
+    for (const [index, file] of files.entries()) {
+      const extension = validateReviewImage(file);
+      const path = `reviews/${crypto.randomUUID()}.${extension}`;
+      const { error: uploadError } = await admin.supabase.storage
+        .from("review-images")
+        .upload(path, file, { contentType: file.type });
+      if (uploadError) throw uploadError;
+      uploadedPaths.push(path);
+      const { data } = admin.supabase.storage.from("review-images").getPublicUrl(path);
+      rows.push({
+        storage_path: path,
+        public_url: data.publicUrl,
+        alt_text: "Customer review screenshot",
+        position: (lastReview?.position ?? -1) + index + 1,
+      });
+    }
+
+    const { error: insertError } = await admin.supabase
+      .from("review_images")
+      .insert(rows);
+    if (insertError) throw insertError;
+  } catch (error) {
+    if (uploadedPaths.length) {
+      await admin.supabase.storage.from("review-images").remove(uploadedPaths);
+    }
+    throw error;
+  }
+
+  revalidatePath("/");
+  revalidatePath("/admin/reviews");
+  redirect("/admin/reviews?uploaded=1");
+}
+
+export async function updateReviewImage(formData: FormData) {
+  const admin = await requireAdmin();
+  if (!admin) redirect("/admin?setup=required");
+  const id = text(formData, "id");
+  const altText = text(formData, "altText");
+  if (!altText || altText.length > 160) {
+    throw new Error("The accessibility description must be between 1 and 160 characters.");
+  }
+  const { error } = await admin.supabase
+    .from("review_images")
+    .update({ alt_text: altText, updated_at: new Date().toISOString() })
+    .eq("id", id);
+  if (error) throw error;
+  revalidatePath("/");
+  revalidatePath("/admin/reviews");
+  redirect("/admin/reviews?saved=1");
+}
+
+export async function moveReviewImage(formData: FormData) {
+  const admin = await requireAdmin();
+  if (!admin) redirect("/admin?setup=required");
+  const id = text(formData, "id");
+  const direction = text(formData, "direction");
+  if (direction !== "earlier" && direction !== "later") {
+    throw new Error("Invalid review direction.");
+  }
+  const { data, error: readError } = await admin.supabase
+    .from("review_images")
+    .select("id, position")
+    .order("position")
+    .order("created_at");
+  if (readError) throw readError;
+  const currentIndex = data.findIndex((review) => review.id === id);
+  const targetIndex = direction === "earlier" ? currentIndex - 1 : currentIndex + 1;
+  if (currentIndex < 0 || targetIndex < 0 || targetIndex >= data.length) {
+    redirect("/admin/reviews");
+  }
+  const current = data[currentIndex];
+  const target = data[targetIndex];
+  const [currentUpdate, targetUpdate] = await Promise.all([
+    admin.supabase.from("review_images").update({ position: target.position, updated_at: new Date().toISOString() }).eq("id", current.id),
+    admin.supabase.from("review_images").update({ position: current.position, updated_at: new Date().toISOString() }).eq("id", target.id),
+  ]);
+  if (currentUpdate.error) throw currentUpdate.error;
+  if (targetUpdate.error) throw targetUpdate.error;
+  revalidatePath("/");
+  revalidatePath("/admin/reviews");
+  redirect("/admin/reviews?reordered=1");
+}
+
+export async function deleteReviewImage(formData: FormData) {
+  const admin = await requireAdmin();
+  if (!admin) redirect("/admin?setup=required");
+  const id = text(formData, "id");
+  const { data: review, error: readError } = await admin.supabase
+    .from("review_images")
+    .select("storage_path")
+    .eq("id", id)
+    .single();
+  if (readError) throw readError;
+  const { error: storageError } = await admin.supabase.storage
+    .from("review-images")
+    .remove([review.storage_path]);
+  if (storageError) throw storageError;
+  const { error: deleteError } = await admin.supabase
+    .from("review_images")
+    .delete()
+    .eq("id", id);
+  if (deleteError) throw deleteError;
+  revalidatePath("/");
+  revalidatePath("/admin/reviews");
+  redirect("/admin/reviews?deleted=1");
 }
 
 export async function updateOrder(formData: FormData) {

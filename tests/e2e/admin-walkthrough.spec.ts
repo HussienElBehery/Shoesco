@@ -30,6 +30,36 @@ test("owner creates a product and a guest can shop it", async ({ browser }) => {
   await expect(ownerPage).toHaveURL(/\/admin$/);
   await expect(ownerPage.getByRole("heading", { name: "Today at Shoesoco" })).toBeVisible();
 
+  await ownerPage.goto("/admin/settings");
+  await expect(ownerPage.getByRole("heading", { name: "Gmail confirmation delivery" })).toBeVisible();
+  await expect(ownerPage.getByText("Ahmed.rag789@gmail.com", { exact: false })).toBeVisible();
+  await expect(ownerPage.getByRole("button", { name: "Save and test Gmail" })).toBeVisible();
+  await expect(ownerPage.getByLabel("Featured pair")).toBeVisible();
+  await expect(ownerPage.getByLabel("Website message to the buyer")).toHaveValue(/\{order_reference\}/);
+  await expect(ownerPage.getByLabel("WhatsApp message from the buyer to Shoesoco")).toHaveValue(/\{item_list\}/);
+  const savedHeroTitle = await ownerPage.getByLabel("Homepage headline").inputValue();
+  await ownerPage.getByRole("button", { name: "Save settings" }).click();
+  await expect(ownerPage).toHaveURL(/\/admin\/settings\?saved=1$/);
+  await expect(ownerPage.getByText("Settings saved and public pages refreshed.")).toBeVisible();
+
+  await ownerPage.goto("/admin/reviews");
+  await expect(ownerPage.getByRole("heading", { name: "Reviews" })).toBeVisible();
+  const existingReviews = await ownerPage.locator("article").count();
+  let reviewAlt = "";
+  if (existingReviews < 20) {
+    reviewAlt = `Temporary review audit ${suffix}`;
+    await ownerPage.locator('input[name="reviewImages"]').setInputFiles("public/images/Logo.jpeg");
+    await ownerPage.getByRole("button", { name: "Upload reviews" }).click();
+    await expect(ownerPage).toHaveURL(/\/admin\/reviews\?uploaded=1$/);
+    const uploadedReview = ownerPage.locator("article").last();
+    await uploadedReview.getByLabel("Accessibility description").fill(reviewAlt);
+    await uploadedReview.getByRole("button", { name: "Save description" }).click();
+    await expect(ownerPage).toHaveURL(/\/admin\/reviews\?saved=1$/);
+    await expect(
+      ownerPage.locator("article").last().getByLabel("Accessibility description"),
+    ).toHaveValue(reviewAlt);
+  }
+
   await ownerPage.goto("/admin/products");
   await ownerPage.getByPlaceholder("Search products").fill("QA Walkthrough Sneaker");
   for (let index = 0; index < 10; index += 1) {
@@ -73,6 +103,12 @@ test("owner creates a product and a guest can shop it", async ({ browser }) => {
     }
   });
 
+  await guestPage.goto("/");
+  await expect(guestPage.getByRole("heading", { level: 1, name: savedHeroTitle })).toBeVisible();
+  if (reviewAlt) {
+    await expect(guestPage.getByAltText(reviewAlt)).toBeVisible();
+  }
+
   await guestPage.goto(`/products?q=${encodeURIComponent(productName)}`);
   await expect(guestPage.getByText(productName, { exact: true })).toBeVisible();
   await guestPage.getByText(productName, { exact: true }).click();
@@ -84,19 +120,31 @@ test("owner creates a product and a guest can shop it", async ({ browser }) => {
   await guestPage.getByRole("link", { name: "View cart" }).click();
   await expect(guestPage.getByText(productName, { exact: true })).toBeVisible();
   await guestPage.getByLabel("Name").fill("QA Customer");
-  await guestPage.getByLabel("Email").fill("qa.customer@example.com");
+  await guestPage.getByLabel("Email (optional)").fill("qa.customer@example.com");
   await guestPage.getByLabel("Phone number").fill("+20 100 000 0000");
   await guestPage.getByLabel("Delivery area").fill("New Cairo");
   await guestPage.getByLabel("Full delivery address").fill("QA Street, Building 1, Apartment 2");
   await expect(
-    guestPage.getByText(/Online ordering is temporarily unavailable/),
+    guestPage.getByRole("button", { name: "Submit order request" }),
   ).toBeVisible();
-  await expect(
-    guestPage.getByRole("button", { name: "Save order and continue to WhatsApp" }),
-  ).toBeDisabled();
   await expect(guestPage.getByText(productName, { exact: true })).toBeVisible();
 
   await ownerPage.bringToFront();
+  if (reviewAlt) {
+    await ownerPage.goto("/admin/reviews");
+    const reviewToDelete = ownerPage.locator("article").last();
+    await expect(
+      reviewToDelete.getByLabel("Accessibility description"),
+    ).toHaveValue(reviewAlt);
+    ownerPage.once("dialog", (dialog) => dialog.accept());
+    await reviewToDelete.getByRole("button", { name: "Delete screenshot" }).click();
+    await expect(ownerPage).toHaveURL(/\/admin\/reviews\?deleted=1$/);
+    await guestPage.goto("/");
+    await expect(guestPage.getByAltText(reviewAlt)).toHaveCount(0);
+  }
+
+  await ownerPage.goto("/admin/products");
+  await ownerPage.getByPlaceholder("Search products").fill(productName);
   await productRow.getByRole("button", { name: "Archive" }).click();
   await expect(ownerPage.getByRole("button", { name: "Archive" })).toHaveCount(0);
 

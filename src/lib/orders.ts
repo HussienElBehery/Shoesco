@@ -1,6 +1,7 @@
 import { formatPrice } from "@/lib/format";
 import type {
   Order,
+  OrderReceiptItem,
   OrderItem,
   OrderStatus,
   WhatsAppOrderDetails,
@@ -33,17 +34,7 @@ export type OrderSubmission = {
   }[];
 };
 
-export type CanonicalOrderItem = {
-  productId: string;
-  slug: string;
-  name: string;
-  image: string;
-  size: string;
-  color: string;
-  quantity: number;
-  unitPrice: number;
-  lineTotal: number;
-};
+export type CanonicalOrderItem = OrderReceiptItem;
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const phonePattern = /^\+?[0-9][0-9\s()-]{6,19}$/;
@@ -80,7 +71,10 @@ export function validateOrderSubmission(value: unknown):
   if (customerName.length < 2 || customerName.length > 100) {
     return { ok: false, error: "Enter a valid name." };
   }
-  if (!emailPattern.test(customerEmail) || customerEmail.length > 254) {
+  if (
+    customerEmail &&
+    (!emailPattern.test(customerEmail) || customerEmail.length > 254)
+  ) {
     return { ok: false, error: "Enter a valid email address." };
   }
   if (!phonePattern.test(customerPhone)) {

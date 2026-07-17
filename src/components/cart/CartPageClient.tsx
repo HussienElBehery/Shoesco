@@ -7,13 +7,18 @@ import { useEffect, useState } from "react";
 import { useCart } from "@/components/cart/CartProvider";
 import { formatPrice } from "@/lib/format";
 import { trackEvent } from "@/lib/analytics";
-import type { WhatsAppOrderDetails } from "@/types/product";
+import { createWhatsAppLink } from "@/lib/whatsapp";
+import type {
+  EmailDelivery,
+  OrderReceiptItem,
+  WhatsAppOrderDetails,
+} from "@/types/product";
 
 const CHECKOUT_DETAILS_KEY = "shoesoco-checkout-details-v1";
 const LEGACY_CHECKOUT_DETAILS_KEY = "shoe" + "sco-checkout-details-v1";
 const CHECKOUT_TOKEN_KEY = "shoesoco-checkout-token-v1";
 
-export function CartPageClient() {
+export function CartPageClient({ whatsappNumber }: { whatsappNumber: string }) {
   const { items, subtotal, updateQuantity, removeItem, clearCart, replaceVariant } = useCart();
   const [details, setDetails] = useState<WhatsAppOrderDetails>({
     customerName: "",
@@ -27,7 +32,11 @@ export function CartPageClient() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [submittedReference, setSubmittedReference] = useState("");
-  const [confirmationMessage, setConfirmationMessage] = useState("");
+  const [submittedItems, setSubmittedItems] = useState<OrderReceiptItem[]>([]);
+  const [submittedSubtotal, setSubmittedSubtotal] = useState(0);
+  const [siteConfirmationMessage, setSiteConfirmationMessage] = useState("");
+  const [whatsappMessage, setWhatsAppMessage] = useState("");
+  const [emailDelivery, setEmailDelivery] = useState<EmailDelivery>("not_requested");
   const [serviceStatus, setServiceStatus] = useState<
     "checking" | "ready" | "unavailable"
   >("checking");
@@ -99,7 +108,6 @@ export function CartPageClient() {
     items.length > 0 &&
     checkoutToken &&
     details.customerName.trim() &&
-    details.customerEmail.trim() &&
     details.customerPhone.trim() &&
     details.deliveryArea.trim() &&
     details.deliveryAddress.trim() &&
@@ -129,9 +137,20 @@ export function CartPageClient() {
         error?: string;
         code?: string;
         reference?: string;
-        confirmationMessage?: string;
+        orderItems?: OrderReceiptItem[];
+        subtotal?: number;
+        siteConfirmationMessage?: string;
+        whatsappMessage?: string;
+        emailDelivery?: EmailDelivery;
       };
-      if (!response.ok || !result.reference || !result.confirmationMessage) {
+      if (
+        !response.ok ||
+        !result.reference ||
+        !Array.isArray(result.orderItems) ||
+        typeof result.subtotal !== "number" ||
+        !result.siteConfirmationMessage ||
+        !result.whatsappMessage
+      ) {
         throw new Error(result.error || "We could not save your order.");
       }
       trackEvent("order_submit", {
@@ -144,7 +163,11 @@ export function CartPageClient() {
       window.localStorage.removeItem(LEGACY_CHECKOUT_DETAILS_KEY);
       window.sessionStorage.removeItem(CHECKOUT_TOKEN_KEY);
       setSubmittedReference(result.reference);
-      setConfirmationMessage(result.confirmationMessage);
+      setSubmittedItems(result.orderItems);
+      setSubmittedSubtotal(result.subtotal);
+      setSiteConfirmationMessage(result.siteConfirmationMessage);
+      setWhatsAppMessage(result.whatsappMessage);
+      setEmailDelivery(result.emailDelivery ?? "not_requested");
       setSubmitting(false);
     } catch (submissionError) {
       setError(
@@ -157,22 +180,69 @@ export function CartPageClient() {
   }
 
   if (submittedReference) {
+    const whatsappLink = createWhatsAppLink({
+      phoneNumber: whatsappNumber,
+      message: whatsappMessage,
+    });
     return (
-      <div className="rounded-[2rem] bg-[#181b21] px-6 py-20 text-center text-[#f4f1ea]">
-        <p className="eyebrow !text-[#c6ff3a]">Order submitted</p>
-        <h1 className="mt-4 text-3xl font-semibold">We received your request.</h1>
+      <div className="rounded-[2rem] bg-[#181b21] px-6 py-12 text-center text-[#f4f1ea] sm:px-10 sm:py-16">
+        <p className="eyebrow !text-[#c6ff3a]">Order received</p>
+        <h1 className="mt-4 text-3xl font-semibold">Thank you—your request is in.</h1>
         <p className="mx-auto mt-3 max-w-xl text-neutral-400">
-          Your order reference is {submittedReference}. Shoesoco has received your details, and the confirmation message is below.
+          We&apos;ve saved your order. Keep your reference for any questions.
         </p>
-        <p
-          className="mx-auto mt-6 max-w-2xl rounded-2xl border border-[#2a2e36] bg-[#0f1115] p-5 text-right text-lg leading-9 text-[#f4f1ea]"
-          dir="rtl"
-        >
-          {confirmationMessage}
-        </p>
-        <Link className="mt-7 inline-flex rounded-full bg-[#c6ff3a] px-6 py-3 text-sm font-semibold text-[#0f1115]" href="/products">
-          Continue shopping
-        </Link>
+        <div className="mx-auto mt-7 max-w-xl rounded-2xl border border-[#c6ff3a]/30 bg-[#c6ff3a]/[0.06] px-5 py-4">
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-neutral-400">Order reference</p>
+          <p className="mt-2 text-xl font-semibold tracking-wide text-[#c6ff3a]">{submittedReference}</p>
+        </div>
+
+        <section aria-label="Order confirmation message" className="mx-auto mt-6 max-w-2xl rounded-2xl border border-[#2a2e36] bg-[#0f1115] p-5 text-right text-lg leading-9 text-[#f4f1ea]" dir="rtl">
+          <h2 className="sr-only">Order confirmation message</h2>
+          <p>{siteConfirmationMessage}</p>
+        </section>
+
+        <section aria-label="Order summary" className="mx-auto mt-6 max-w-2xl overflow-hidden rounded-2xl border border-[#2a2e36] bg-[#0f1115] text-left">
+          <div className="border-b border-[#2a2e36] px-5 py-4">
+            <h2 className="font-semibold">Order summary</h2>
+          </div>
+          <div className="divide-y divide-[#2a2e36]">
+            {submittedItems.map((item) => (
+              <div className="flex items-start justify-between gap-5 px-5 py-4" key={`${item.productId}:${item.size}:${item.color}`}>
+                <div>
+                  <p className="font-medium">{item.quantity} × {item.name}</p>
+                  <p className="mt-1 text-sm text-neutral-400">Size {item.size} · {item.color}</p>
+                </div>
+                <p className="shrink-0 text-sm font-semibold">{formatPrice(item.lineTotal, "EGP")}</p>
+              </div>
+            ))}
+          </div>
+          <div className="flex items-center justify-between border-t border-[#2a2e36] px-5 py-4">
+            <span className="text-sm text-neutral-400">Subtotal</span>
+            <strong>{formatPrice(submittedSubtotal, "EGP")}</strong>
+          </div>
+        </section>
+
+        {emailDelivery === "sent" && (
+          <p className="mt-4 text-sm text-neutral-400">A receipt has been sent to your email.</p>
+        )}
+        {emailDelivery === "failed" && (
+          <p className="mt-4 text-sm text-neutral-400">Email copy unavailable. Your order is still safely saved.</p>
+        )}
+
+        <section className="mx-auto mt-7 max-w-2xl rounded-2xl border border-[#2a2e36] bg-[#20242b] px-5 py-6">
+          <h2 className="text-lg font-semibold">Complete your confirmation</h2>
+          <p className="mx-auto mt-2 max-w-lg text-sm text-neutral-400">
+            Continue on WhatsApp to confirm the shipping cost with our team.
+          </p>
+        </section>
+        <div className="mt-6 flex flex-wrap justify-center gap-3">
+          <a className="inline-flex rounded-full bg-[#25d366] px-6 py-3 text-sm font-semibold text-[#0f1115]" href={whatsappLink} rel="noreferrer" target="_blank">
+            Continue on WhatsApp
+          </a>
+          <Link className="inline-flex rounded-full border border-[#2a2e36] px-6 py-3 text-sm font-semibold" href="/products">
+            Continue shopping
+          </Link>
+        </div>
       </div>
     );
   }
@@ -255,8 +325,8 @@ export function CartPageClient() {
             <input autoComplete="name" className="mt-2 h-12 w-full rounded-xl border border-[#2a2e36] bg-[#0f1115]/70 px-4 outline-none transition focus:border-[#c6ff3a]" maxLength={100} onChange={(event) => setDetails({ ...details, customerName: event.target.value })} required value={details.customerName} />
           </label>
           <label className="block text-sm">
-            Email
-            <input autoComplete="email" className="mt-2 h-12 w-full rounded-xl border border-[#2a2e36] bg-[#0f1115]/70 px-4 outline-none transition focus:border-[#c6ff3a]" maxLength={254} onChange={(event) => setDetails({ ...details, customerEmail: event.target.value })} required type="email" value={details.customerEmail} />
+            Email <span className="text-neutral-500">(optional)</span>
+            <input autoComplete="email" className="mt-2 h-12 w-full rounded-xl border border-[#2a2e36] bg-[#0f1115]/70 px-4 outline-none transition focus:border-[#c6ff3a]" maxLength={254} onChange={(event) => setDetails({ ...details, customerEmail: event.target.value })} type="email" value={details.customerEmail} />
           </label>
           <label className="block text-sm">
             Phone number
@@ -303,7 +373,7 @@ export function CartPageClient() {
               : "Submit order request"}
         </button>
         <p className="mt-4 text-xs leading-5 text-neutral-500">
-          Submitting records your request with Shoesoco, sends your order details to the owner, and shows your confirmation message here. No payment is taken here.
+          Submitting saves your request and shows your receipt here. If you provide an email, we will also send you a copy. After submission, continue on WhatsApp to confirm the shipping cost. No payment is taken here.
         </p>
       </aside>
     </div>

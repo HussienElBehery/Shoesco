@@ -22,10 +22,15 @@ export const siteConfig: StoreSettings & {
   heroTitle: "Move well. Look effortless.",
   heroDescription:
     "Everyday sneakers, performance running shoes, and care essentials selected for comfort, clean design, and the way you move.",
+  heroFeaturedProductId: null,
   deliveryNote: "Delivery cost and timing are confirmed with you on WhatsApp.",
   returnsNote: "Exchange requests are reviewed before the pair is worn outdoors.",
   sizeGuideNote: "Measure your foot heel-to-toe and choose the closest EU size.",
   orderReplyEnabled: true,
   orderReplyTemplate:
     "Hello {customer_name}, thank you for your Shoesoco order {order_reference}. We received your request for {subtotal}. We will confirm stock, delivery cost, and timing shortly.",
+  siteConfirmationTemplate:
+    "مساء الخير اوردر رقم {order_reference} حضرتك طالب {item_summary} ببلغ حضرتك ان تأكيد اي اوردر بيكون بتحويل الشحن علي الرقم دا 01154497618",
+  whatsappConfirmationTemplate:
+    "مساء الخير، أود استكمال تأكيد طلبي لدى Shoesoco.\n\nرقم الطلب: {order_reference}\n\nالمنتجات:\n{item_list}\n\nبرجاء مراجعة الطلب وتأكيد تكلفة الشحن والخطوات المطلوبة لإتمامه.",
 };

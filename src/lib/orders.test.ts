@@ -50,6 +50,24 @@ describe("order validation", () => {
       }).ok,
     ).toBe(false);
   });
+
+  it("accepts an omitted email and still rejects a malformed supplied email", () => {
+    const withoutEmail = validateOrderSubmission({
+      ...validSubmission,
+      details: { ...validSubmission.details, customerEmail: "" },
+    });
+    expect(withoutEmail.ok).toBe(true);
+    if (withoutEmail.ok) {
+      expect(withoutEmail.data.details.customerEmail).toBe("");
+    }
+
+    expect(
+      validateOrderSubmission({
+        ...validSubmission,
+        details: { ...validSubmission.details, customerEmail: "invalid" },
+      }).ok,
+    ).toBe(false);
+  });
 });
 
 describe("order messaging", () => {

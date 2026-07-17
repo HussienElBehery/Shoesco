@@ -2,7 +2,13 @@ import { NextResponse } from "next/server";
 import { createHmac } from "node:crypto";
 
 import { apiError, logServerError, readJsonBody } from "@/lib/api";
-import { createCustomerConfirmationMessage } from "@/lib/order-notifications";
+import { siteConfig } from "@/data/site";
+import {
+  createCustomerEmailMessage,
+  createCustomerSiteConfirmationMessage,
+  createCustomerWhatsAppMessage,
+  deliverCustomerConfirmation,
+} from "@/lib/order-notifications";
 import {
   validateOrderSubmission,
   type CanonicalOrderItem,
@@ -85,15 +91,56 @@ export async function POST(request: Request) {
       order_items: CanonicalOrderItem[];
       was_existing: boolean;
     };
-    const confirmationMessage = createCustomerConfirmationMessage({
+    const { data: templateSettings, error: templateError } = await supabase
+      .from("store_settings")
+      .select("site_confirmation_template, whatsapp_confirmation_template")
+      .eq("id", 1)
+      .maybeSingle();
+    if (templateError) {
+      logServerError("order_confirmation_templates_failed", templateError, {
+        orderReference: result.order_reference,
+      });
+    }
+    const siteConfirmationMessage = createCustomerSiteConfirmationMessage({
       reference: result.order_reference,
       items: result.order_items,
+      template:
+        templateSettings?.site_confirmation_template ??
+        siteConfig.siteConfirmationTemplate,
     });
+    const whatsappMessage = createCustomerWhatsAppMessage({
+      reference: result.order_reference,
+      items: result.order_items,
+      template:
+        templateSettings?.whatsapp_confirmation_template ??
+        siteConfig.whatsappConfirmationTemplate,
+    });
+    const emailMessage = createCustomerEmailMessage({
+      customerName: details.customerName,
+      reference: result.order_reference,
+      items: result.order_items,
+      subtotal: result.order_subtotal,
+    });
+    const emailResult = await deliverCustomerConfirmation({
+      recipient: details.customerEmail,
+      reference: result.order_reference,
+      emailMessage,
+      wasExisting: result.was_existing,
+    });
+    if (emailResult.status === "failed") {
+      logServerError("customer_confirmation_email_failed", emailResult.error, {
+        orderReference: result.order_reference,
+      });
+    }
 
     return NextResponse.json({
       orderId: result.order_id,
       reference: result.order_reference,
-      confirmationMessage,
+      orderItems: result.order_items,
+      subtotal: result.order_subtotal,
+      siteConfirmationMessage,
+      whatsappMessage,
+      emailDelivery: emailResult.status,
       existing: result.was_existing,
     });
   } catch (error) {
