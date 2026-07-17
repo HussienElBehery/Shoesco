@@ -113,9 +113,20 @@ production never shows fallback inventory when the database is unavailable.
    SUPABASE_SERVICE_ROLE_KEY=
    RATE_LIMIT_SECRET=
    NEXT_PUBLIC_SITE_URL=http://localhost:3000
+   # Optional: Gmail can instead be configured by the owner in Admin Settings.
+   GMAIL_USER=
+   GMAIL_APP_PASSWORD=
    ```
 
 3. Apply the SQL files in `supabase/migrations` in filename order.
+
+The owner can edit the website and WhatsApp checkout messages in
+`/admin/settings`, and can upload, reorder, describe, or remove homepage review
+screenshots in `/admin/reviews`.
+
+The owner can also connect `Ahmed.rag789@gmail.com` in `/admin/settings` using a
+Google app password. The credential is verified server-side and stored encrypted
+in Supabase Vault; it is never displayed again after saving.
 
 4. Start the development server:
 

@@ -18,6 +18,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
               <Link href="/admin">Overview</Link>
               <Link href="/admin/orders">Orders</Link>
               <Link href="/admin/products">Products</Link>
+              <Link href="/admin/reviews">Reviews</Link>
               <Link href="/admin/settings">Settings</Link>
               <Link href="/" target="_blank">View store</Link>
             </nav>
