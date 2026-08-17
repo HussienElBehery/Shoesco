@@ -21,8 +21,15 @@ export function SizeGuideDialog({ note }: { note: string }) {
   const [open, setOpen] = useState(false);
   return (
     <>
-      <button className="text-sm font-semibold underline decoration-[#c6ff3a]" onClick={() => setOpen(true)} type="button">
-        Open size guide
+      <button
+        className="inline-flex items-center gap-1.5 text-xs font-medium text-neutral-400 transition hover:text-[#f4f1ea]"
+        onClick={() => setOpen(true)}
+        type="button"
+      >
+        <svg aria-hidden="true" className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24">
+          <path d="M4 8.5h16v7H4zM8 8.5v3M12 8.5v2M16 8.5v3" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.6" />
+        </svg>
+        Size guide
       </button>
       <Drawer onClose={() => setOpen(false)} open={open} title="EU size guide">
         <div className="p-5">

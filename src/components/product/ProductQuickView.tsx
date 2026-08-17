@@ -25,7 +25,7 @@ export function ProductQuickView({
   return (
     <Drawer onClose={onClose} open={Boolean(product)} title="Quick preview">
       {product && (
-        <div className="p-5">
+        <div className="bg-[radial-gradient(circle_at_top_right,rgba(198,255,58,0.06),transparent_28%)] p-5 sm:p-6">
           <ProductGallery compact key={product.id} product={product} />
           <p className="mt-7 editorial-label text-[#c6ff3a]">
             {product.category} / {formatGender(product.gender)}

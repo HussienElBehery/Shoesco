@@ -96,7 +96,7 @@ export function ProductForm({ product }: { product?: Product }) {
             <div className="mt-5 grid grid-cols-2 gap-4 sm:grid-cols-3">
               {product.images.map((image) => (
                 <div className="relative overflow-hidden rounded-xl border border-[#2a2e36] bg-[#0f1115] p-2" key={image.id}>
-                  <div className="relative aspect-square overflow-hidden rounded-lg bg-[#f2efe7]"><Image alt={image.alt} className="object-contain p-2 mix-blend-multiply" fill sizes="180px" src={image.url} /></div>
+                  <div className="relative aspect-square overflow-hidden rounded-lg bg-[#f4f1ea]"><Image alt={image.alt} className="object-contain p-2 mix-blend-multiply" fill sizes="180px" src={image.url} /></div>
                   <label className="mt-2 block text-xs">Alt text<input className="mt-1 w-full rounded border border-[#2a2e36] bg-[#181b21] px-2 py-1" defaultValue={image.alt} name={`imageAlt:${image.id}`} /></label>
                   <div className="mt-2 flex items-center justify-between gap-2 text-xs">
                     <label>Position <input className="ml-1 w-12 rounded border border-[#2a2e36] bg-[#181b21] px-1 py-0.5" defaultValue={image.position} min="0" name={`imagePosition:${image.id}`} type="number" /></label>

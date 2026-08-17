@@ -40,10 +40,7 @@ export function parseCatalogFilters(params: URLSearchParams): CatalogFilters {
       category === "Shoe Care"
         ? category
         : "All",
-    gender:
-      gender === "Men" || gender === "Women" || gender === "Unisex"
-        ? gender
-        : "All",
+    gender: gender === "Men" || gender === "Women" ? gender : "All",
     size: params.get("size") ?? "",
     availability:
       availability === "available" || availability === "sold-out"
