@@ -33,6 +33,10 @@ const nextConfig: NextConfig = {
     return [{ source: "/(.*)", headers: securityHeaders }];
   },
   images: {
+    // Vercel's image optimizer can return 402 when the project reaches its
+    // transformation allowance. Product uploads are already optimized public
+    // assets, so serving them directly keeps storefront photography reliable.
+    unoptimized: true,
     remotePatterns: [
       {
         protocol: "https",
