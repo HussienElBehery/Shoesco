@@ -28,10 +28,10 @@ export function MiniCartDrawer() {
           <div className="space-y-4">
             {items.map((item) => (
               <article
-                className="grid grid-cols-[88px_1fr] gap-4 rounded-2xl border border-[#2a2e36] bg-[#181b21] p-3"
+                className="grid grid-cols-[88px_1fr] gap-4 rounded-2xl border border-[#3a3f49] bg-[#181b21] p-3 shadow-[0_12px_35px_rgba(0,0,0,0.16)]"
                 key={item.key}
               >
-                <div className="relative aspect-square overflow-hidden rounded-xl bg-[#20242b]">
+                <div className="relative aspect-square overflow-hidden rounded-xl bg-[#f4f1ea]">
                   {item.image && (
                     <Image
                       alt={item.name}
@@ -90,21 +90,21 @@ export function MiniCartDrawer() {
           </div>
         )}
       </div>
-      <div className="sticky bottom-0 border-t border-[#2a2e36] bg-[#0f1115] p-5">
+      <div className="sticky bottom-0 border-t border-[#2a2e36] bg-[#0f1115]/95 p-5 shadow-[0_-16px_40px_rgba(0,0,0,0.22)] backdrop-blur-xl">
         <div className="flex items-center justify-between">
           <span className="text-neutral-400">Subtotal</span>
           <strong className="text-xl">{formatPrice(subtotal, "EGP")}</strong>
         </div>
-        <div className="mt-4 grid grid-cols-2 gap-3">
+        <div className="mt-4 grid gap-3 sm:grid-cols-[0.8fr_1.2fr]">
           <button
-            className="rounded-full border border-[#2a2e36] px-4 py-3 text-sm font-semibold"
+            className="rounded-full border border-[#3a3f49] px-4 py-3.5 text-sm font-semibold transition hover:border-[#f4f1ea]"
             onClick={closeCart}
             type="button"
           >
             Continue shopping
           </button>
           <Link
-            className="rounded-full bg-[#c6ff3a] px-4 py-3 text-center text-sm font-semibold text-[#0f1115]"
+            className="rounded-full bg-[#c6ff3a] px-4 py-3.5 text-center text-sm font-bold text-[#0f1115] shadow-[0_10px_30px_rgba(198,255,58,0.2)] transition hover:bg-[#d4ff6b]"
             href="/cart"
             onClick={closeCart}
           >

@@ -21,7 +21,7 @@ export function ProductPurchasePanel({
   const canAdd = Boolean(size && color && isHydrated);
 
   return (
-    <div className="mt-8 border-t border-neutral-200 pt-7">
+    <div className="mt-8 rounded-[1.75rem] border border-[#2a2e36] bg-[#181b21] p-5 shadow-[0_18px_55px_rgba(0,0,0,0.18)] sm:p-6">
       <div className={`grid gap-7 ${compact ? "" : "sm:grid-cols-2"}`}>
         <fieldset>
           <legend className="text-xs font-bold uppercase tracking-[0.18em]">
@@ -72,7 +72,7 @@ export function ProductPurchasePanel({
       </div>
 
       <button
-        className="mt-8 inline-flex w-full items-center justify-center rounded-full bg-neutral-950 px-6 py-4 text-sm font-semibold text-[#f4f1ea] transition hover:bg-[#c6ff3a] hover:text-[#0f1115] disabled:cursor-not-allowed disabled:bg-neutral-300 sm:w-auto"
+        className="mt-8 inline-flex min-h-14 w-full items-center justify-center gap-3 rounded-full bg-[#c6ff3a] px-7 py-4 text-base font-bold text-[#0f1115] shadow-[0_12px_35px_rgba(198,255,58,0.2)] transition duration-200 hover:bg-[#d4ff6b] hover:shadow-[0_14px_40px_rgba(198,255,58,0.32)] active:scale-[0.99] disabled:cursor-not-allowed disabled:bg-[#2a2e36] disabled:text-neutral-500 disabled:shadow-none"
         disabled={!canAdd}
         onClick={() => {
           addItem({
@@ -97,6 +97,11 @@ export function ProductPurchasePanel({
         }}
         type="button"
       >
+        <svg aria-hidden="true" className="h-5 w-5" fill="none" viewBox="0 0 24 24">
+          <path d="M6.75 8.25h10.5l.75 11.25H6L6.75 8.25Z" stroke="currentColor" strokeLinejoin="round" strokeWidth="1.8" />
+          <path d="M9 9V6.75a3 3 0 0 1 6 0V9" stroke="currentColor" strokeLinecap="round" strokeWidth="1.8" />
+        </svg>
+        <span aria-live="polite">
         {added
           ? "Added to cart"
           : !isHydrated
@@ -104,6 +109,7 @@ export function ProductPurchasePanel({
             : canAdd
               ? "Add to cart"
               : "Currently sold out"}
+        </span>
       </button>
     </div>
   );

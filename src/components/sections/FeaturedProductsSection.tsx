@@ -7,7 +7,7 @@ import type { Product } from "@/types/product";
 
 export function FeaturedProductsSection({ products }: { products: Product[] }) {
   return (
-    <section className="py-20 sm:py-28">
+    <section className="border-y border-[#2a2e36] bg-[radial-gradient(circle_at_top_right,rgba(198,255,58,0.06),transparent_32%)] py-20 sm:py-28">
       <Container>
         <div className="flex items-start justify-between gap-4 sm:items-end sm:gap-6">
           <div>
@@ -29,7 +29,7 @@ export function FeaturedProductsSection({ products }: { products: Product[] }) {
             <ArrowIcon className="h-4 w-4" />
           </Link>
         </div>
-        <ProductGrid className="mt-10 lg:grid-cols-4" products={products} />
+        <ProductGrid className="mt-10 gap-y-8 lg:grid-cols-4" products={products} />
       </Container>
     </section>
   );

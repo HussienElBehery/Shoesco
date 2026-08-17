@@ -21,12 +21,12 @@ export function ProductArtwork({
   if (image) {
     return (
       <>
-        <div className="absolute inset-0 bg-[#f2efe7]" />
+        <div className="absolute inset-0 bg-[#f4f1ea]" />
         <div className="absolute inset-x-[18%] bottom-[13%] h-8 rounded-full bg-[#0f1115]/12 blur-xl" />
         <Image
           alt={image.alt || product.name}
           className={cn(
-            "object-contain p-3 mix-blend-multiply drop-shadow-[0_24px_28px_rgba(15,17,21,0.24)] sm:p-5",
+            "object-contain p-3 mix-blend-multiply sm:p-5",
             className,
           )}
           fill

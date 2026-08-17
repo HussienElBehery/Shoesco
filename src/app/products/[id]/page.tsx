@@ -81,7 +81,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
       />
       <div className="grid gap-10 lg:grid-cols-[1.05fr_0.95fr] lg:gap-16">
         <ProductGallery product={product} />
-        <div className="flex flex-col justify-center">
+        <div className="flex flex-col justify-center rounded-[2rem] border border-[#2a2e36] bg-[radial-gradient(circle_at_top_right,rgba(198,255,58,0.07),transparent_30%),#181b21] p-6 shadow-[0_24px_75px_rgba(0,0,0,0.22)] sm:p-8">
           <div className="flex flex-wrap items-center gap-2">
             <p className="editorial-label text-[#c6ff3a]">{product.category} / {formatGender(product.gender)}</p>
             {product.merchandisingLabel && (
@@ -109,15 +109,17 @@ export default async function ProductPage({ params }: ProductPageProps) {
 
           <ProductPurchasePanel product={product} />
 
-          <div className="mt-5 flex flex-wrap items-center gap-5">
+          <div className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-2 rounded-2xl border border-[#2a2e36]/80 bg-[#0f1115]/35 px-4 py-3">
+            <span className="mr-auto text-xs text-neutral-500">Not sure about the fit?</span>
             <SizeGuideDialog note={settings.sizeGuideNote} />
+            <span aria-hidden="true" className="h-3 w-px bg-[#3a3f49]" />
             <a
-              className="text-sm font-semibold underline decoration-[#c6ff3a]"
+              className="inline-flex items-center gap-1.5 text-xs font-medium text-neutral-400 transition hover:text-[#f4f1ea]"
               href={sizeHelpLink}
               rel="noreferrer"
               target="_blank"
             >
-              Ask about sizing on WhatsApp
+              Ask us on WhatsApp
             </a>
           </div>
 

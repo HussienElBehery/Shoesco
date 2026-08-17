@@ -26,7 +26,7 @@ export function ProductCard({ product, onQuickView, priority = false }: ProductC
     ];
 
   return (
-    <article className="group flex min-w-0 h-full flex-col">
+    <article className="group flex min-w-0 h-full flex-col rounded-[2rem] border border-[#2a2e36] bg-[#181b21] p-2 shadow-[0_18px_60px_rgba(0,0,0,0.2)] transition duration-300 hover:-translate-y-1 hover:border-[#3a3f49] hover:shadow-[0_24px_80px_rgba(0,0,0,0.32)]">
       <div className={`relative overflow-hidden rounded-[1.75rem] ${background}`}>
         <Link className="block" href={href}>
           <div className="relative aspect-[4/3] overflow-hidden sm:aspect-[1.08]">
@@ -64,13 +64,13 @@ export function ProductCard({ product, onQuickView, priority = false }: ProductC
         )}
       </div>
 
-      <div className="flex flex-1 flex-col px-1 pt-5">
+      <div className="flex flex-1 flex-col px-3 pb-3 pt-5">
         <div className="flex items-start justify-between gap-4">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#c6ff3a]">
               {product.category} / {formatGender(product.gender)}
             </p>
-            <h2 className="mt-2 text-xl font-semibold tracking-tight">
+            <h2 className="mt-2 line-clamp-2 min-h-14 text-xl font-semibold leading-7 tracking-tight">
               <Link href={href}>{product.name}</Link>
             </h2>
           </div>
@@ -79,11 +79,11 @@ export function ProductCard({ product, onQuickView, priority = false }: ProductC
           </p>
         </div>
 
-        <p className="mt-3 line-clamp-2 text-sm leading-6 text-neutral-500">
+        <p className="mt-3 line-clamp-2 min-h-12 text-sm leading-6 text-neutral-500">
           {product.shortDescription}
         </p>
 
-        <div className="mt-4 flex flex-wrap gap-1.5">
+        <div className="mt-4 flex min-h-7 flex-wrap gap-1.5">
           {product.sizes.filter((size) => size.available).slice(0, 5).map((size) => (
             <span
               className="flex h-7 min-w-7 items-center justify-center rounded-full border border-neutral-200 bg-[#181b21] px-2 text-[11px] text-neutral-500"
@@ -99,13 +99,16 @@ export function ProductCard({ product, onQuickView, priority = false }: ProductC
           )}
         </div>
 
-        <Link
-          className="mt-auto flex items-center justify-between border-b border-neutral-300 pb-2 pt-6 text-sm font-semibold transition hover:border-neutral-950"
-          href={href}
-        >
-          Discover this pair
-          <ArrowIcon className="h-4 w-4 transition group-hover:translate-x-1" />
-        </Link>
+        <div className="mt-auto pt-6">
+          <Link
+            aria-label={`Buy now – ${product.name}`}
+            className="flex min-h-12 items-center justify-between rounded-full bg-[#c6ff3a] px-5 py-3.5 text-sm font-bold text-[#0f1115] shadow-[0_10px_30px_rgba(198,255,58,0.16)] transition duration-200 hover:bg-[#d4ff6b] hover:shadow-[0_12px_34px_rgba(198,255,58,0.28)] active:scale-[0.98]"
+            href={href}
+          >
+            Buy now
+            <ArrowIcon className="h-4 w-4 transition group-hover:translate-x-1" />
+          </Link>
+        </div>
       </div>
     </article>
   );

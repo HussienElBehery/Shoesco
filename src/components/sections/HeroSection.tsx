@@ -41,7 +41,7 @@ export function HeroSection({
             {product ? (
               <Link
                 aria-label={`View ${product.name}`}
-                className="group relative min-h-[300px] overflow-hidden bg-[#f2efe7] sm:min-h-[380px] lg:min-h-[480px]"
+                className="group relative min-h-[300px] overflow-hidden bg-[#f4f1ea] sm:min-h-[380px] lg:min-h-[480px]"
                 href={`/products/${product.id}`}
               >
                 <ProductArtwork

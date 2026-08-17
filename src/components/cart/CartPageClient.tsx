@@ -8,11 +8,8 @@ import { useCart } from "@/components/cart/CartProvider";
 import { formatPrice } from "@/lib/format";
 import { trackEvent } from "@/lib/analytics";
 import { createWhatsAppLink } from "@/lib/whatsapp";
-import type {
-  EmailDelivery,
-  OrderReceiptItem,
-  WhatsAppOrderDetails,
-} from "@/types/product";
+import { CART_STORAGE_KEY } from "@/lib/cart-storage";
+import type { OrderReceiptItem, WhatsAppOrderDetails } from "@/types/product";
 
 const CHECKOUT_DETAILS_KEY = "shoesoco-checkout-details-v1";
 const LEGACY_CHECKOUT_DETAILS_KEY = "shoe" + "sco-checkout-details-v1";
@@ -31,12 +28,6 @@ export function CartPageClient({ whatsappNumber }: { whatsappNumber: string }) {
   const [checkoutToken, setCheckoutToken] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
-  const [submittedReference, setSubmittedReference] = useState("");
-  const [submittedItems, setSubmittedItems] = useState<OrderReceiptItem[]>([]);
-  const [submittedSubtotal, setSubmittedSubtotal] = useState(0);
-  const [siteConfirmationMessage, setSiteConfirmationMessage] = useState("");
-  const [whatsappMessage, setWhatsAppMessage] = useState("");
-  const [emailDelivery, setEmailDelivery] = useState<EmailDelivery>("not_requested");
   const [serviceStatus, setServiceStatus] = useState<
     "checking" | "ready" | "unavailable"
   >("checking");
@@ -141,7 +132,6 @@ export function CartPageClient({ whatsappNumber }: { whatsappNumber: string }) {
         subtotal?: number;
         siteConfirmationMessage?: string;
         whatsappMessage?: string;
-        emailDelivery?: EmailDelivery;
       };
       if (
         !response.ok ||
@@ -158,17 +148,16 @@ export function CartPageClient({ whatsappNumber }: { whatsappNumber: string }) {
         subtotal,
       });
       clearCart();
+      window.sessionStorage.removeItem(CART_STORAGE_KEY);
       window.sessionStorage.removeItem(CHECKOUT_DETAILS_KEY);
       window.localStorage.removeItem(CHECKOUT_DETAILS_KEY);
       window.localStorage.removeItem(LEGACY_CHECKOUT_DETAILS_KEY);
       window.sessionStorage.removeItem(CHECKOUT_TOKEN_KEY);
-      setSubmittedReference(result.reference);
-      setSubmittedItems(result.orderItems);
-      setSubmittedSubtotal(result.subtotal);
-      setSiteConfirmationMessage(result.siteConfirmationMessage);
-      setWhatsAppMessage(result.whatsappMessage);
-      setEmailDelivery(result.emailDelivery ?? "not_requested");
-      setSubmitting(false);
+      const whatsappLink = createWhatsAppLink({
+        phoneNumber: whatsappNumber,
+        message: result.whatsappMessage,
+      });
+      window.location.assign(whatsappLink);
     } catch (submissionError) {
       setError(
         submissionError instanceof Error
@@ -177,74 +166,6 @@ export function CartPageClient({ whatsappNumber }: { whatsappNumber: string }) {
       );
       setSubmitting(false);
     }
-  }
-
-  if (submittedReference) {
-    const whatsappLink = createWhatsAppLink({
-      phoneNumber: whatsappNumber,
-      message: whatsappMessage,
-    });
-    return (
-      <div className="rounded-[2rem] bg-[#181b21] px-6 py-12 text-center text-[#f4f1ea] sm:px-10 sm:py-16">
-        <p className="eyebrow !text-[#c6ff3a]">Order received</p>
-        <h1 className="mt-4 text-3xl font-semibold">Thank you—your request is in.</h1>
-        <p className="mx-auto mt-3 max-w-xl text-neutral-400">
-          We&apos;ve saved your order. Keep your reference for any questions.
-        </p>
-        <div className="mx-auto mt-7 max-w-xl rounded-2xl border border-[#c6ff3a]/30 bg-[#c6ff3a]/[0.06] px-5 py-4">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-neutral-400">Order reference</p>
-          <p className="mt-2 text-xl font-semibold tracking-wide text-[#c6ff3a]">{submittedReference}</p>
-        </div>
-
-        <section aria-label="Order confirmation message" className="mx-auto mt-6 max-w-2xl rounded-2xl border border-[#2a2e36] bg-[#0f1115] p-5 text-right text-lg leading-9 text-[#f4f1ea]" dir="rtl">
-          <h2 className="sr-only">Order confirmation message</h2>
-          <p>{siteConfirmationMessage}</p>
-        </section>
-
-        <section aria-label="Order summary" className="mx-auto mt-6 max-w-2xl overflow-hidden rounded-2xl border border-[#2a2e36] bg-[#0f1115] text-left">
-          <div className="border-b border-[#2a2e36] px-5 py-4">
-            <h2 className="font-semibold">Order summary</h2>
-          </div>
-          <div className="divide-y divide-[#2a2e36]">
-            {submittedItems.map((item) => (
-              <div className="flex items-start justify-between gap-5 px-5 py-4" key={`${item.productId}:${item.size}:${item.color}`}>
-                <div>
-                  <p className="font-medium">{item.quantity} × {item.name}</p>
-                  <p className="mt-1 text-sm text-neutral-400">Size {item.size} · {item.color}</p>
-                </div>
-                <p className="shrink-0 text-sm font-semibold">{formatPrice(item.lineTotal, "EGP")}</p>
-              </div>
-            ))}
-          </div>
-          <div className="flex items-center justify-between border-t border-[#2a2e36] px-5 py-4">
-            <span className="text-sm text-neutral-400">Subtotal</span>
-            <strong>{formatPrice(submittedSubtotal, "EGP")}</strong>
-          </div>
-        </section>
-
-        {emailDelivery === "sent" && (
-          <p className="mt-4 text-sm text-neutral-400">A receipt has been sent to your email.</p>
-        )}
-        {emailDelivery === "failed" && (
-          <p className="mt-4 text-sm text-neutral-400">Email copy unavailable. Your order is still safely saved.</p>
-        )}
-
-        <section className="mx-auto mt-7 max-w-2xl rounded-2xl border border-[#2a2e36] bg-[#20242b] px-5 py-6">
-          <h2 className="text-lg font-semibold">Complete your confirmation</h2>
-          <p className="mx-auto mt-2 max-w-lg text-sm text-neutral-400">
-            Continue on WhatsApp to confirm the shipping cost with our team.
-          </p>
-        </section>
-        <div className="mt-6 flex flex-wrap justify-center gap-3">
-          <a className="inline-flex rounded-full bg-[#25d366] px-6 py-3 text-sm font-semibold text-[#0f1115]" href={whatsappLink} rel="noreferrer" target="_blank">
-            Continue on WhatsApp
-          </a>
-          <Link className="inline-flex rounded-full border border-[#2a2e36] px-6 py-3 text-sm font-semibold" href="/products">
-            Continue shopping
-          </Link>
-        </div>
-      </div>
-    );
   }
 
   if (items.length === 0) {
@@ -260,8 +181,8 @@ export function CartPageClient({ whatsappNumber }: { whatsappNumber: string }) {
   }
 
   return (
-    <div className="grid gap-8 lg:grid-cols-[1.2fr_0.8fr]">
-      <div>
+    <div className="grid gap-8 lg:grid-cols-[1.15fr_0.85fr] lg:items-start">
+      <div className="min-w-0 rounded-[2rem] border border-[#2a2e36] bg-[#181b21] p-5 shadow-[0_20px_65px_rgba(0,0,0,0.18)] sm:p-7">
         <div className="flex items-end justify-between">
           <div>
             <p className="eyebrow">Your selection</p>
@@ -271,10 +192,10 @@ export function CartPageClient({ whatsappNumber }: { whatsappNumber: string }) {
             Clear cart
           </button>
         </div>
-        <div className="mt-8 divide-y divide-neutral-200">
+        <div className="mt-8 space-y-3">
           {items.map((item) => (
-            <article className="grid grid-cols-[96px_1fr] gap-5 py-6 sm:grid-cols-[120px_1fr_auto]" key={item.key}>
-              <div className="relative aspect-square overflow-hidden rounded-2xl bg-[#181b21]">
+            <article className="grid grid-cols-[88px_1fr] gap-4 rounded-[1.5rem] border border-[#2a2e36] bg-[#0f1115] p-4 sm:grid-cols-[112px_1fr_auto] sm:gap-5" key={item.key}>
+              <div className="relative aspect-square overflow-hidden rounded-2xl bg-[#f4f1ea]">
                 {item.image && <Image alt={item.name} className="object-contain p-3" fill sizes="120px" src={item.image} />}
               </div>
               <div>
@@ -303,9 +224,9 @@ export function CartPageClient({ whatsappNumber }: { whatsappNumber: string }) {
                   </label>
                 </div>
                 <div className="mt-4 flex items-center gap-3">
-                  <button aria-label="Decrease quantity" className="h-8 w-8 rounded-full border" onClick={() => updateQuantity(item.key, item.quantity - 1)} type="button">-</button>
+                  <button aria-label="Decrease quantity" className="h-9 w-9 rounded-full border border-[#3a3f49] transition hover:border-[#c6ff3a] hover:text-[#c6ff3a]" onClick={() => updateQuantity(item.key, item.quantity - 1)} type="button">-</button>
                   <span className="text-sm">{item.quantity}</span>
-                  <button aria-label="Increase quantity" className="h-8 w-8 rounded-full border" onClick={() => updateQuantity(item.key, item.quantity + 1)} type="button">+</button>
+                  <button aria-label="Increase quantity" className="h-9 w-9 rounded-full border border-[#3a3f49] transition hover:border-[#c6ff3a] hover:text-[#c6ff3a]" onClick={() => updateQuantity(item.key, item.quantity + 1)} type="button">+</button>
                   <button className="ml-2 text-xs text-neutral-500 underline" onClick={() => removeItem(item.key)} type="button">Remove</button>
                 </div>
               </div>
@@ -317,8 +238,10 @@ export function CartPageClient({ whatsappNumber }: { whatsappNumber: string }) {
         </div>
       </div>
 
-      <aside className="h-fit rounded-[2rem] bg-[#181b21] p-6 text-[#f4f1ea] sm:p-8">
+      <aside className="h-fit rounded-[2rem] border border-[#c6ff3a]/25 bg-[radial-gradient(circle_at_top_right,rgba(198,255,58,0.09),transparent_30%),#181b21] p-6 text-[#f4f1ea] shadow-[0_24px_80px_rgba(0,0,0,0.28)] sm:p-8 lg:sticky lg:top-24">
         <p className="eyebrow !text-[#c6ff3a]">Confirm your order</p>
+        <h2 className="mt-3 text-2xl font-semibold tracking-tight">Delivery details</h2>
+        <p className="mt-2 text-sm leading-6 text-neutral-400">We’ll save your request, then open WhatsApp with your order message ready to send.</p>
         <div className="mt-6 space-y-4">
           <label className="block text-sm">
             Name
@@ -345,7 +268,7 @@ export function CartPageClient({ whatsappNumber }: { whatsappNumber: string }) {
             <textarea className="mt-2 min-h-24 w-full rounded-xl border border-[#2a2e36] bg-[#0f1115]/70 p-4 outline-none transition focus:border-[#c6ff3a]" maxLength={500} onChange={(event) => setDetails({ ...details, notes: event.target.value })} value={details.notes} />
           </label>
         </div>
-        <div className="mt-7 flex items-center justify-between border-t border-[#2a2e36] pt-6">
+        <div className="mt-7 flex items-center justify-between rounded-2xl border border-[#2a2e36] bg-[#0f1115]/70 px-5 py-4">
           <span className="text-neutral-400">Subtotal</span>
           <strong className="text-xl">{formatPrice(subtotal, "EGP")}</strong>
         </div>
@@ -361,7 +284,7 @@ export function CartPageClient({ whatsappNumber }: { whatsappNumber: string }) {
           </p>
         )}
         <button
-          className={`mt-6 flex w-full items-center justify-center rounded-full px-6 py-4 text-sm font-semibold transition ${canOrder ? "bg-[#c6ff3a] text-[#0f1115] hover:bg-[#d4ff6b]" : "pointer-events-none bg-[#181b21]/10 text-[#f4f1ea]/40"}`}
+          className={`mt-6 flex min-h-14 w-full items-center justify-center rounded-full px-6 py-4 text-base font-bold transition ${canOrder ? "bg-[#c6ff3a] text-[#0f1115] shadow-[0_12px_35px_rgba(198,255,58,0.22)] hover:bg-[#d4ff6b] hover:shadow-[0_14px_40px_rgba(198,255,58,0.32)] active:scale-[0.99]" : "cursor-not-allowed bg-[#2a2e36] text-neutral-500"}`}
           disabled={!canOrder || submitting}
           onClick={submitOrder}
           type="button"
@@ -373,7 +296,7 @@ export function CartPageClient({ whatsappNumber }: { whatsappNumber: string }) {
               : "Submit order request"}
         </button>
         <p className="mt-4 text-xs leading-5 text-neutral-500">
-          Submitting saves your request and shows your receipt here. If you provide an email, we will also send you a copy. After submission, continue on WhatsApp to confirm the shipping cost. No payment is taken here.
+          Submitting saves your request and opens WhatsApp automatically to confirm shipping cost. If you provide an email, we will also send you a copy. No payment is taken here.
         </p>
       </aside>
     </div>

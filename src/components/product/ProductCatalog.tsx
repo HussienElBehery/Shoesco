@@ -14,7 +14,7 @@ import {
   serializeCatalogFilters,
   type CatalogFilters,
 } from "@/lib/catalog-filters";
-import { PRODUCT_GENDER_OPTIONS } from "@/lib/product-labels";
+import { CATALOG_GENDER_OPTIONS } from "@/lib/product-labels";
 import type { Product } from "@/types/product";
 
 function FilterFields({
@@ -28,7 +28,12 @@ function FilterFields({
 }) {
   const sizes = Array.from(
     new Set(products.flatMap((product) => product.sizes.map((size) => size.size))),
-  ).sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
+  )
+    .filter((size) => {
+      const normalized = size.trim();
+      return normalized !== "" && normalized !== "-" && normalized !== "_";
+    })
+    .sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
 
   function update<K extends keyof CatalogFilters>(
     key: K,
@@ -55,7 +60,7 @@ function FilterFields({
         Gender
         <select className={selectClass} onChange={(event) => update("gender", event.target.value as CatalogFilters["gender"])} value={filters.gender}>
           <option value="All">All</option>
-          {PRODUCT_GENDER_OPTIONS.map((option) => (
+          {CATALOG_GENDER_OPTIONS.map((option) => (
             <option key={option.value} value={option.value}>{option.label}</option>
           ))}
         </select>
@@ -135,12 +140,12 @@ export function ProductCatalog({ products }: { products: Product[] }) {
 
   return (
     <div className="mt-8 min-w-0 max-w-full scroll-mt-24" id="catalog">
-      <div className="sticky top-20 z-30 rounded-[1.5rem] border border-[#2a2e36] bg-[#0f1115]/95 p-4 shadow-xl backdrop-blur-xl">
+      <div className="sticky top-20 z-30 rounded-[1.75rem] border border-[#3a3f49] bg-[#181b21]/95 p-4 shadow-[0_18px_60px_rgba(0,0,0,0.3)] backdrop-blur-xl sm:p-5">
         <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
           <label className="relative flex-1">
             <span className="sr-only">Search products</span>
             <input
-              className="h-12 w-full rounded-full border border-[#2a2e36] bg-[#181b21] px-5 text-sm placeholder:text-neutral-500"
+              className="h-12 w-full rounded-full border border-[#3a3f49] bg-[#0f1115] px-5 text-sm transition placeholder:text-neutral-500 focus:border-[#c6ff3a]"
               disabled={!hydrated}
               onChange={(event) => setFilters({ ...filters, query: event.target.value })}
               placeholder="Search products, colors, or collections"
@@ -152,17 +157,27 @@ export function ProductCatalog({ products }: { products: Product[] }) {
             <button className="rounded-full border border-[#2a2e36] px-5 py-3 text-sm font-semibold lg:hidden" onClick={() => setFiltersOpen(true)} type="button">
               Filters{activeFilterCount ? ` (${activeFilterCount})` : ""}
             </button>
-            <select
-              aria-label="Sort products"
-              className="min-w-0 max-w-full rounded-full border border-[#2a2e36] bg-[#181b21] px-4 py-3 text-sm font-semibold"
-              onChange={(event) => setFilters({ ...filters, sort: event.target.value as CatalogFilters["sort"] })}
-              value={filters.sort}
-            >
-              <option value="featured">Featured</option>
-              <option value="newest">Newest</option>
-              <option value="price-asc">Price: low to high</option>
-              <option value="price-desc">Price: high to low</option>
-            </select>
+            <div className="relative min-w-0">
+              <select
+                aria-label="Sort products"
+                className="w-full min-w-0 appearance-none rounded-full border border-[#3a3f49] bg-[#0f1115] py-3 pl-5 pr-11 text-sm font-semibold transition focus:border-[#c6ff3a]"
+                onChange={(event) => setFilters({ ...filters, sort: event.target.value as CatalogFilters["sort"] })}
+                value={filters.sort}
+              >
+                <option value="featured">Featured</option>
+                <option value="newest">Newest</option>
+                <option value="price-asc">Price: low to high</option>
+                <option value="price-desc">Price: high to low</option>
+              </select>
+              <svg
+                aria-hidden="true"
+                className="pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-400"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <path d="m8 10 4 4 4-4" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" />
+              </svg>
+            </div>
           </div>
         </div>
         <div className="mt-4 hidden lg:block">

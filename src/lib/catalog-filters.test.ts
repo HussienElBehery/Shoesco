@@ -42,6 +42,11 @@ describe("catalog filters", () => {
     expect(filters.category).toBe("Shoe Care");
   });
 
+  it("does not expose the internal Unisex value as a catalog filter", () => {
+    const filters = parseCatalogFilters(new URLSearchParams("gender=Unisex"));
+    expect(filters.gender).toBe("All");
+  });
+
   it("sorts products by ascending price", () => {
     const result = filterAndSortProducts(products, {
       ...defaultCatalogFilters,
